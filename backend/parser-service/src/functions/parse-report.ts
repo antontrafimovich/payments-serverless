@@ -1,5 +1,6 @@
-import { APIGatewayEvent, Handler } from "aws-lambda";
+import { APIGatewayEvent } from "aws-lambda";
 import { parse } from "papaparse";
+
 import { parseFormData } from "./../shared";
 
 export const handler = async (event: APIGatewayEvent) => {
@@ -8,26 +9,25 @@ export const handler = async (event: APIGatewayEvent) => {
   if (formData === null) {
     return {
       statusCode: 400,
-      error: "File hasn't been provided",
+      body: "File hasn't been provided.",
     };
   }
-
-  console.log(formData);
 
   const parsedData = parseFormData(formData);
 
   if (parsedData === null) {
     return {
       statusCode: 500,
-      error:
-        "Some problem with file format. Please check carefully file you sent",
+      body: "Some problem with file format. Please check carefully file you sent.",
     };
   }
 
+  console.log(parsedData);
+
   if (parsedData.contentType !== "text/csv") {
     return {
-      statusCode: 404,
-      error: "File must havebe in a csv format",
+      statusCode: 400,
+      body: "File must have a csv format.",
     };
   }
 
