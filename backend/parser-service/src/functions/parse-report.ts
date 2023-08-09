@@ -1,9 +1,16 @@
-import { APIGatewayEvent } from "aws-lambda";
+import { APIGatewayEvent, Handler, APIGatewayProxyHandler } from "aws-lambda";
 import { parse } from "papaparse";
 
+import { createClient } from "../app";
 import { parseFormData } from "./../shared";
+import { service } from "./../shop";
 
-export const handler = async (event: APIGatewayEvent) => {
+const shops = service(createClient(process.env.NOTION_KEY as string));
+
+export const handler: APIGatewayProxyHandler = async (
+  event: APIGatewayEvent,
+  context
+) => {
   const formData = event.body;
 
   if (formData === null) {
@@ -31,10 +38,22 @@ export const handler = async (event: APIGatewayEvent) => {
     };
   }
 
-  const content = parse(parsedData.content);
+  let content;
+  try {
+    content = parse(parsedData.content);
+  } catch (err) {
+    return {
+      statusCode: 500,
+      body: typeof err === "string" ? err : ((err as any).message as string),
+    };
+  }
+
+  const shopsMetadata = await shops.getAll();
+
+  console.log(content);
 
   return {
     statusCode: 200,
-    body: content,
+    body: JSON.stringify(content),
   };
 };
