@@ -1,8 +1,10 @@
 export const parseFormData = (inputText: string) => {
   const inputString = inputText; // Your input string
 
+  console.log(inputText);
+
   const regex =
-    /filename="([^"]+)"\s+Content-Type: ([^\n]+)([\s\S]*?)\n----------------------------/g;
+    /filename="([^"]+)"\s+Content-Type: ([^\n]+)([\s\S]*?)\n---/g;
   const [data] = [...inputString.matchAll(regex)];
 
   return {
