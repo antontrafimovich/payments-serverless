@@ -3,6 +3,7 @@ import * as gw from "aws-cdk-lib/aws-apigateway";
 import { Runtime } from "aws-cdk-lib/aws-lambda";
 import * as lambda from "aws-cdk-lib/aws-lambda-nodejs";
 import { Construct } from "constructs";
+import "dotenv/config";
 
 export class ParserServiceStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -11,11 +12,14 @@ export class ParserServiceStack extends cdk.Stack {
     // The code that defines your stack goes here
 
     const parseHandler = new lambda.NodejsFunction(this, "ParseHandler", {
-      entry: "src/functions/parse-report.ts",
+      entry: "src/index.ts",
       handler: "handler",
       runtime: Runtime.NODEJS_18_X,
       environment: {
         NAME: "ANTON",
+        NOTION_DATABASE: process.env.NOTION_DATABASE as string,
+        NOTION_KEY: process.env.NOTION_KEY as string,
+        PHONE_NUMBER: process.env.PHONE_NUMBER as string,
       },
     });
 
