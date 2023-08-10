@@ -84,6 +84,9 @@ export const handler: APIGatewayProxyHandler = async (
 
   return {
     statusCode: 200,
+    headers: {
+      'Content-Type': 'text/csv'
+    },
     body: csv,
   };
 };
