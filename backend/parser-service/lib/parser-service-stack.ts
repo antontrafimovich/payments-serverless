@@ -16,7 +16,6 @@ export class ParserServiceStack extends cdk.Stack {
       handler: "handler",
       runtime: Runtime.NODEJS_18_X,
       environment: {
-        NAME: "ANTON",
         NOTION_DATABASE: process.env.NOTION_DATABASE as string,
         NOTION_KEY: process.env.NOTION_KEY as string,
         PHONE_NUMBER: process.env.PHONE_NUMBER as string,
