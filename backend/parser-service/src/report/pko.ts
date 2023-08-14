@@ -13,11 +13,20 @@ const getAddress = (item: string[]) => {
 export const parse = (csv: string[][]) => {
   const [header, ...rows] = csv;
 
-  return rows.map((item) => {
-    return {
-      address: getAddress(item),
-      date: item[1],
-      value: item[3],
-    };
-  });
+  return rows.reduce((result, next) => {
+    const [, date, , value] = next;
+
+    if (!date || !value) {
+      return result;
+    }
+
+    return [
+      ...result,
+      {
+        address: getAddress(next),
+        date: next[1],
+        value: next[3],
+      },
+    ];
+  }, [] as { address: string; date: string; value: string }[]);
 };
