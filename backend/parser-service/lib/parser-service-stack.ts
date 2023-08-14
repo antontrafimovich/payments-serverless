@@ -1,9 +1,10 @@
+import "dotenv/config";
+
 import * as cdk from "aws-cdk-lib";
 import * as gw from "aws-cdk-lib/aws-apigateway";
 import { Runtime } from "aws-cdk-lib/aws-lambda";
 import * as lambda from "aws-cdk-lib/aws-lambda-nodejs";
 import { Construct } from "constructs";
-import "dotenv/config";
 
 export class ParserServiceStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
