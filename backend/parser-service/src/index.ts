@@ -1,13 +1,27 @@
-import { APIGatewayEvent, Handler, APIGatewayProxyHandler } from "aws-lambda";
+import { APIGatewayEvent, APIGatewayProxyHandler } from "aws-lambda";
 import { parse } from "papaparse";
-import { parse as pkoParse } from "./report/pko";
 
 import { createClient } from "./app";
-import { parseFormData, toCsv } from "./shared";
+import { parse as milParse } from "./report/mil";
+import { parse as pkoParse } from "./report/pko";
+import {
+  isFormDataFile,
+  isFormDataString,
+  parseFormData,
+  toCsv,
+} from "./shared";
 import { service } from "./shop";
 import { Shop } from "./shop/shop.model";
 
 const shops = service(createClient(process.env.NOTION_KEY as string));
+
+const getParser = (bank: "pko" | "millenium") => {
+  if (bank === "pko") {
+    return pkoParse;
+  }
+
+  return milParse;
+};
 
 export const handler: APIGatewayProxyHandler = async (
   event: APIGatewayEvent
@@ -21,7 +35,7 @@ export const handler: APIGatewayProxyHandler = async (
     };
   }
 
-  const parsedData = parseFormData(formData);
+  const parsedData = parseFormData(formData, event.headers["Content-Type"]);
 
   if (parsedData === null) {
     return {
@@ -30,7 +44,30 @@ export const handler: APIGatewayProxyHandler = async (
     };
   }
 
-  if (parsedData.contentType !== "text/csv") {
+  const { bank, report } = parsedData;
+
+  if (!isFormDataFile(report)) {
+    return {
+      statusCode: 400,
+      body: "Report must be a csv file.",
+    };
+  }
+
+  if (!isFormDataString(bank)) {
+    return {
+      statusCode: 400,
+      body: "Bank must be a string",
+    };
+  }
+
+  if (bank !== "pko" && bank !== "millenium") {
+    return {
+      statusCode: 400,
+      body: "This bank is not supported yet",
+    };
+  }
+
+  if (report.contentType !== "text/csv") {
     return {
       statusCode: 400,
       body: "File must have a csv format.",
@@ -39,7 +76,7 @@ export const handler: APIGatewayProxyHandler = async (
 
   let content;
   try {
-    content = parse<string[]>(parsedData.content).data;
+    content = parse<string[]>(report.content);
   } catch (err) {
     return {
       statusCode: 500,
@@ -59,7 +96,9 @@ export const handler: APIGatewayProxyHandler = async (
     };
   }
 
-  const paymentsData = pkoParse(content);
+  const parser = getParser(bank);
+
+  const paymentsData = parser(content.data);
 
   const resultData = paymentsData.map((item, index) => {
     const shopInfo = shopsMetadata.find((shopInfo) => {
@@ -85,7 +124,7 @@ export const handler: APIGatewayProxyHandler = async (
   return {
     statusCode: 200,
     headers: {
-      'Content-Type': 'text/csv'
+      "Content-Type": "text/csv",
     },
     body: csv,
   };
