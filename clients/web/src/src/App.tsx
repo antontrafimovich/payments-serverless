@@ -7,11 +7,18 @@ function App() {
       encType="multipart/form-data"
       method="post"
     >
-      <select name="bank" id="bank">
-        <option value="pko">PKO</option>
-        <option value="millenium">Millenium</option>
-      </select>
-      <input type="file" name="report" />
+      <label>
+        Select bank:{" "}
+        <select name="bank" id="bank">
+          <option value="pko">PKO</option>
+          <option value="millenium">Millenium</option>
+        </select>
+      </label>
+
+      <label>
+        Report: <input type="file" name="report" />
+      </label>
+
       <button type="submit">Send file</button>
     </form>
   );

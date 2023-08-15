@@ -22,13 +22,8 @@ export class WebStack extends cdk.Stack {
 
     bucket.grantRead(accessIdentity);
 
-    new s3deploy.BucketDeployment(this, "at-payments-frontend-deployment", {
-      sources: [s3deploy.Source.asset("./src/dist")],
-      destinationBucket: bucket,
-    });
-
-    new cloudfront.Distribution(this, "at-payments-frontend-dist", {
-      defaultRootObject: 'index.html',
+    const cf = new cloudfront.Distribution(this, "at-payments-frontend-dist", {
+      defaultRootObject: "index.html",
       defaultBehavior: {
         origin: new origins.S3Origin(bucket, {
           originAccessIdentity: accessIdentity,
@@ -36,11 +31,11 @@ export class WebStack extends cdk.Stack {
       },
     });
 
-    // The code that defines your stack goes here
-
-    // example resource
-    // const queue = new sqs.Queue(this, 'WebQueue', {
-    //   visibilityTimeout: cdk.Duration.seconds(300)
-    // });
+    new s3deploy.BucketDeployment(this, "at-payments-frontend-deployment", {
+      sources: [s3deploy.Source.asset("./src/dist")],
+      destinationBucket: bucket,
+      distributionPaths: ["/*"],
+      distribution: cf,
+    });
   }
 }
