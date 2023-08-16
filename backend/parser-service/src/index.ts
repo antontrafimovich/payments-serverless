@@ -1,4 +1,8 @@
-import { APIGatewayEvent, APIGatewayProxyHandler } from "aws-lambda";
+import {
+  APIGatewayEvent,
+  APIGatewayProxyHandler,
+  APIGatewayProxyResult,
+} from "aws-lambda";
 import { parse } from "papaparse";
 
 import { createClient } from "./app";
@@ -23,9 +27,9 @@ const getParser = (bank: "pko" | "millenium") => {
   return milParse;
 };
 
-export const handler: APIGatewayProxyHandler = async (
+export const handler = async (
   event: APIGatewayEvent
-) => {
+): Promise<APIGatewayProxyResult> => {
   const formData = event.body;
 
   if (formData === null) {
@@ -116,16 +120,16 @@ export const handler: APIGatewayProxyHandler = async (
     return [index, item.value, item.date, shopInfo?.type, counterparty];
   });
 
-  const csv = toCsv(
-    ["Id", "Value", "Date", "Type", "Counterparty"],
-    resultData
-  );
+  // const csv = toCsv(
+  //   ["Id", "Value", "Date", "Type", "Counterparty"],
+  //   resultData
+  // );
 
   return {
     statusCode: 200,
-    headers: {
-      "Content-Type": "text/csv",
-    },
-    body: csv,
+    body: JSON.stringify({
+      headers: ["Id", "Value", "Date", "Type", "Counterparty"],
+      data: resultData,
+    }),
   };
 };
