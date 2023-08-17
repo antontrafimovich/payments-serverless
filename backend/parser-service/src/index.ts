@@ -1,19 +1,10 @@
-import {
-  APIGatewayEvent,
-  APIGatewayProxyHandler,
-  APIGatewayProxyResult,
-} from "aws-lambda";
+import { APIGatewayEvent, APIGatewayProxyResult } from "aws-lambda";
 import { parse } from "papaparse";
 
 import { createClient } from "./app";
 import { parse as milParse } from "./report/mil";
 import { parse as pkoParse } from "./report/pko";
-import {
-  isFormDataFile,
-  isFormDataString,
-  parseFormData,
-  toCsv,
-} from "./shared";
+import { isFormDataFile, isFormDataString, parseFormData } from "./shared";
 import { service } from "./shop";
 import { Shop } from "./shop/shop.model";
 
@@ -36,8 +27,13 @@ export const handler = async (
     return {
       statusCode: 400,
       body: "File hasn't been provided.",
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+      },
     };
   }
+
+  console.log(formData);
 
   const parsedData = parseFormData(formData, event.headers["Content-Type"]);
 
@@ -45,6 +41,9 @@ export const handler = async (
     return {
       statusCode: 500,
       body: "Some problem with file format. Please check carefully file you sent.",
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+      },
     };
   }
 
@@ -54,6 +53,9 @@ export const handler = async (
     return {
       statusCode: 400,
       body: "Report must be a csv file.",
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+      },
     };
   }
 
@@ -61,6 +63,9 @@ export const handler = async (
     return {
       statusCode: 400,
       body: "Bank must be a string",
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+      },
     };
   }
 
@@ -68,6 +73,9 @@ export const handler = async (
     return {
       statusCode: 400,
       body: "This bank is not supported yet",
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+      },
     };
   }
 
@@ -75,6 +83,9 @@ export const handler = async (
     return {
       statusCode: 400,
       body: "File must have a csv format.",
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+      },
     };
   }
 
@@ -85,6 +96,9 @@ export const handler = async (
     return {
       statusCode: 500,
       body: typeof err === "string" ? err : ((err as any).message as string),
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+      },
     };
   }
 
@@ -97,6 +111,9 @@ export const handler = async (
       body: `Notion Error: ${
         typeof err === "string" ? err : (err as Error).message
       }`,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+      },
     };
   }
 
@@ -127,6 +144,9 @@ export const handler = async (
 
   return {
     statusCode: 200,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+    },
     body: JSON.stringify({
       headers: ["Id", "Value", "Date", "Type", "Counterparty"],
       data: resultData,

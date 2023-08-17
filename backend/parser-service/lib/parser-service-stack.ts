@@ -23,7 +23,12 @@ export class ParserServiceStack extends cdk.Stack {
       },
     });
 
-    const gateway = new gw.RestApi(this, "AtPaymentsApi");
+    const gateway = new gw.RestApi(this, "AtPaymentsApi", {
+      defaultCorsPreflightOptions: {
+        allowOrigins: gw.Cors.ALL_ORIGINS,
+        allowMethods: gw.Cors.ALL_METHODS,
+      },
+    });
     const parseHandlerIntegration = new gw.LambdaIntegration(parseHandler);
     gateway.root
       .addResource("report")
