@@ -1,10 +1,30 @@
+import "react-data-grid/lib/styles.css";
+
+import { useMemo } from "react";
+import DataGrid from "react-data-grid";
+
 export type ExpensesProps = {
   data: {
-    header: string[];
+    headers: string[];
     data: string[][];
   };
 };
 
 export const Expenses = ({ data }: ExpensesProps) => {
-  return <>{JSON.stringify(data)}</>;
+  const [columns, rows] = useMemo(() => {
+    const columns = data.headers.map((item) => ({ key: item, name: item }));
+
+    const rows = data.data.map((row) => {
+      return data.headers.reduce((result, next, idx) => {
+        return {
+          ...result,
+          [next]: row[idx],
+        };
+      }, {});
+    });
+
+    return [columns, rows];
+  }, [data]);
+
+  return <DataGrid columns={columns} rows={rows} />;
 };
