@@ -1,8 +1,13 @@
 import "./App.css";
+import { Expenses } from "./expenses/expenses";
 import { usePost } from "./shared/utils/api";
 
 function App() {
   const { post, pending, data } = usePost("/report");
+
+  if (data && !pending) {
+    return <Expenses data={data} />;
+  }
 
   return (
     <form
@@ -20,7 +25,6 @@ function App() {
       }}
     >
       {pending && "Loading..."}
-      {data && JSON.stringify(data)}
       <label>
         Select bank:{" "}
         <select name="bank" id="bank">
