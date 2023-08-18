@@ -35,7 +35,7 @@ export const handler = async (
 
   console.log(formData);
 
-  const parsedData = parseFormData(formData, event.headers["Content-Type"]);
+  const parsedData = parseFormData(formData, event.headers["content-type"]);
 
   if (parsedData === null) {
     return {
