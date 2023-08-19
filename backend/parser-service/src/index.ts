@@ -4,11 +4,18 @@ import { parse } from "papaparse";
 import { createClient } from "./app";
 import { parse as milParse } from "./report/mil";
 import { parse as pkoParse } from "./report/pko";
-import { isFormDataFile, isFormDataString, parseFormData } from "./shared";
+import {
+  isFormDataFile,
+  isFormDataString,
+  parseFormData,
+  stringToError,
+  toResponse,
+} from "./shared";
 import { service } from "./shop";
 import { Shop } from "./shop/shop.model";
 
-const shops = service(createClient(process.env.NOTION_KEY as string));
+const mapDb = createClient(process.env.NOTION_KEY as string);
+const shops = service(mapDb);
 
 const getParser = (bank: "pko" | "millenium") => {
   if (bank === "pko") {
@@ -24,13 +31,7 @@ export const handler = async (
   const formData = event.body;
 
   if (formData === null) {
-    return {
-      statusCode: 400,
-      body: "File hasn't been provided.",
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-      },
-    };
+    return stringToError("File hasn't been provided.", 400);
   }
 
   console.log(formData);
@@ -38,83 +39,48 @@ export const handler = async (
   const parsedData = parseFormData(formData, event.headers["content-type"]);
 
   if (parsedData === null) {
-    return {
-      statusCode: 500,
-      body: "Some problem with file format. Please check carefully file you sent.",
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-      },
-    };
+    return stringToError(
+      "Some problem with file format. Please check carefully file you've sent.",
+      500
+    );
   }
 
   const { bank, report } = parsedData;
 
   if (!isFormDataFile(report)) {
-    return {
-      statusCode: 400,
-      body: "Report must be a csv file.",
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-      },
-    };
+    return stringToError("Report must be a csv file.", 400);
   }
 
   if (!isFormDataString(bank)) {
-    return {
-      statusCode: 400,
-      body: "Bank must be a string",
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-      },
-    };
+    return stringToError("Bank must be a string.", 400);
   }
 
   if (bank !== "pko" && bank !== "millenium") {
-    return {
-      statusCode: 400,
-      body: "This bank is not supported yet",
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-      },
-    };
+    return stringToError("This bank is not supported yet.", 400);
   }
 
   if (report.contentType !== "text/csv") {
-    return {
-      statusCode: 400,
-      body: "File must have a csv format.",
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-      },
-    };
+    return stringToError("File must have a csv format.", 400);
   }
 
   let content;
   try {
     content = parse<string[]>(report.content);
   } catch (err) {
-    return {
-      statusCode: 500,
-      body: typeof err === "string" ? err : ((err as any).message as string),
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-      },
-    };
+    return stringToError(
+      typeof err === "string" ? err : ((err as any).message as string),
+      500
+    );
   }
 
   let shopsMetadata: Shop[];
   try {
     shopsMetadata = await shops.getAll();
   } catch (err) {
-    return {
-      statusCode: 500,
-      body: `Notion Error: ${
-        typeof err === "string" ? err : (err as Error).message
-      }`,
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-      },
-    };
+    return stringToError(
+      `Notion Error: ${typeof err === "string" ? err : (err as Error).message}`,
+      500
+    );
   }
 
   const parser = getParser(bank);
@@ -142,14 +108,11 @@ export const handler = async (
   //   resultData
   // );
 
-  return {
+  return toResponse({
     statusCode: 200,
-    headers: {
-      "Access-Control-Allow-Origin": "*",
-    },
     body: JSON.stringify({
       headers: ["Id", "Value", "Date", "Type", "Counterparty"],
       data: resultData,
     }),
-  };
+  });
 };
