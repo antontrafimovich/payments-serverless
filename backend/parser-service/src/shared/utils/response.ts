@@ -5,7 +5,7 @@ export const stringToError = (v: string, code: number = 500) => {
     statusCode: code,
     body: v,
     headers: {
-      "Content-Type": "text/string",
+      "Content-Type": "text/plain",
     },
   });
 };
