@@ -29,6 +29,7 @@ export class ParserServiceStack extends cdk.Stack {
         allowMethods: gw.Cors.ALL_METHODS,
       },
     });
+    
     const parseHandlerIntegration = new gw.LambdaIntegration(parseHandler);
     gateway.root
       .addResource("report")
