@@ -1,13 +1,13 @@
 // import * as cdk from 'aws-cdk-lib';
 // import { Template } from 'aws-cdk-lib/assertions';
-// import * as NotionService from '../lib/notion-service-stack';
+// import * as MapService from '../lib/map-service-stack';
 
 // example test. To run these tests, uncomment this file along with the
-// example resource in lib/notion-service-stack.ts
+// example resource in lib/map-service-stack.ts
 test('SQS Queue Created', () => {
 //   const app = new cdk.App();
 //     // WHEN
-//   const stack = new NotionService.NotionServiceStack(app, 'MyTestStack');
+//   const stack = new MapService.MapServiceStack(app, 'MyTestStack');
 //     // THEN
 //   const template = Template.fromStack(stack);
 
