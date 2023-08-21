@@ -1,5 +1,7 @@
 import { useState } from "react";
 
+import { apiPaths } from "../api";
+
 export const useGet = (url: string, settings?: RequestInit) => {
   const [error, setError] = useState<{ code: number; message: string } | null>(
     null
@@ -48,7 +50,7 @@ export const usePost = (url: string, settings?: RequestInit) => {
 
   const send = (body: any) => {
     setPending(true);
-    fetch(import.meta.env.VITE_API_URL + url, {
+    fetch(apiPaths.report + url, {
       ...(settings || {}),
       method: "post",
       body,
