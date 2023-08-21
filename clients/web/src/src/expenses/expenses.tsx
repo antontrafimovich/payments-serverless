@@ -12,7 +12,11 @@ export type ExpensesProps = {
 
 export const Expenses = ({ data }: ExpensesProps) => {
   const [columns, rows] = useMemo(() => {
-    const columns = data.headers.map((item) => ({ key: item, name: item }));
+    const columns = data.headers.map((item) => ({
+      key: item,
+      name: item,
+      width: item === "Counterparty" ? 450 : undefined,
+    }));
 
     const rows = data.data.map((row) => {
       return data.headers.reduce((result, next, idx) => {
@@ -26,5 +30,9 @@ export const Expenses = ({ data }: ExpensesProps) => {
     return [columns, rows];
   }, [data]);
 
-  return <DataGrid columns={columns} rows={rows} />;
+  return (
+    <div className="expenses">
+      <DataGrid columns={columns} rows={rows} />
+    </div>
+  );
 };
