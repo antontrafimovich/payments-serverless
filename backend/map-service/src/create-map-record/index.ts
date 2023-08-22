@@ -37,6 +37,8 @@ export const handler = async (
 
   let bodyParams;
 
+  console.log(event);
+
   try {
     bodyParams = JSON.parse(event.body);
   } catch (err) {
