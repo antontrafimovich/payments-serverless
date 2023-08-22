@@ -1,0 +1,11 @@
+.expenses-context-menu {
+  position: absolute;
+  background-color: #ffffff;
+  border: 1px solid black;
+  padding: 16px;
+  list-style: none;
+}
+
+.expenses-context-menu li {
+  padding: 8px;
+}
