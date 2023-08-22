@@ -29,6 +29,8 @@ export const handler = async (
       headers: {
         "Content-Type": "text/plain",
         "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Headers": "*",
+        "Access-Control-Allow-Methods": "*",
       },
     };
   }
@@ -44,6 +46,8 @@ export const handler = async (
       headers: {
         "Content-Type": "text/plain",
         "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Headers": "*",
+        "Access-Control-Allow-Methods": "*",
       },
     };
   }
@@ -59,6 +63,8 @@ export const handler = async (
       headers: {
         "Content-Type": "text/plain",
         "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Headers": "*",
+        "Access-Control-Allow-Methods": "*",
       },
     };
   }
@@ -101,6 +107,8 @@ export const handler = async (
       headers: {
         "Content-Type": "text/plain",
         "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Headers": "*",
+        "Access-Control-Allow-Methods": "*",
       },
     };
   }
@@ -110,6 +118,8 @@ export const handler = async (
     body: JSON.stringify(result),
     headers: {
       "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Headers": "*",
+      "Access-Control-Allow-Methods": "*",
     },
   };
 };
