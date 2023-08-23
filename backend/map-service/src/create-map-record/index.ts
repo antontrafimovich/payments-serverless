@@ -5,7 +5,7 @@ import { array, mixed, object, string, InferType } from "yup";
 const bodySchema = array(
   object({
     address: string().required(),
-    type: mixed<string>().oneOf(["Home"]).required(),
+    type: mixed<string>().oneOf(["Home", "Groceries"]).required(),
   })
 ).required();
 
@@ -60,8 +60,10 @@ export const handler = async (
     mappings = await validate(bodyParams);
   } catch (err) {
     return {
-      statusCode: 500,
-      body: typeof err === "string" ? err : (err as Error).message,
+      statusCode: 400,
+      body: `Body schema validation error: ${
+        typeof err === "string" ? err : (err as Error).message
+      }`,
       headers: {
         "Content-Type": "text/plain",
         "Access-Control-Allow-Origin": "*",
@@ -94,7 +96,7 @@ export const handler = async (
           Type: {
             type: "select",
             select: {
-              id: mapping.type,
+              name: mapping.type,
             },
           },
         },
