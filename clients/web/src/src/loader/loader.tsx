@@ -49,7 +49,7 @@ export const Loader = () => {
             <FileInput
               w="290px"
               placeholder="Pick file"
-              label="Your resume"
+              label="Add bank report"
               mt="md"
               {...form.getInputProps("report")}
             />
@@ -60,7 +60,7 @@ export const Loader = () => {
                 variant="outline"
                 onClick={() => form.values}
               >
-                Set random values
+                Send
               </Button>
             </Group>
           </Box>
