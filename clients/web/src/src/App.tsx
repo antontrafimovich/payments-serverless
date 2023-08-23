@@ -1,12 +1,14 @@
 import "./App.css";
+
 import { Expenses } from "./expenses/expenses";
+import { apiPaths } from "./shared";
 import { usePost } from "./shared/utils/api";
 
 function App() {
-  const { post, pending, data } = usePost("/report");
+  const { post, pending, data } = usePost(apiPaths.report + "/report");
 
   if (data && !pending) {
-    return <Expenses data={data} />;
+    return <Expenses info={data} />;
   }
 
   return (

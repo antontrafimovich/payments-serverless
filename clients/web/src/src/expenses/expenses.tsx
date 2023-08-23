@@ -4,24 +4,32 @@ import "react-data-grid/lib/styles.css";
 import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import DataGrid from "react-data-grid";
 import { createPortal } from "react-dom";
+import { Button, Modal, TextInput } from "@mantine/core";
+import { useDisclosure } from "@mantine/hooks";
+import { apiPaths, usePost } from "../shared";
 
 export type ExpensesProps = {
-  data: {
+  info: {
     headers: string[];
     data: string[][];
   };
 };
 
-export const Expenses = ({ data }: ExpensesProps) => {
+export const Expenses = ({ info }: ExpensesProps) => {
+  const { post, pending, data } = usePost(apiPaths.map + "/map");
+
+  const [address, setAddress] = useState<string | null>(null);
+  const [type, setType] = useState<string | null>(null);
+
   const [columns, rows] = useMemo(() => {
-    const columns = data.headers.map((item) => ({
+    const columns = info.headers.map((item) => ({
       key: item,
       name: item,
       width: item === "Counterparty" ? 450 : undefined,
     }));
 
-    const rows = data.data.map((row) => {
-      return data.headers.reduce((result, next, idx) => {
+    const rows = info.data.map((row) => {
+      return info.headers.reduce((result, next, idx) => {
         return {
           ...result,
           [next]: row[idx],
@@ -30,7 +38,7 @@ export const Expenses = ({ data }: ExpensesProps) => {
     });
 
     return [columns, rows];
-  }, [data]);
+  }, [info]);
 
   const [contextMenuProps, setContextMenuProps] = useState<{
     rowIdx: number;
@@ -38,9 +46,13 @@ export const Expenses = ({ data }: ExpensesProps) => {
     left: number;
   } | null>(null);
 
+  const [opened, { open, close }] = useDisclosure(false);
+
   const menuRef = useRef<HTMLMenuElement | null>(null);
 
   const isContextMenuOpen = contextMenuProps !== null;
+
+  console.log(data);
 
   useLayoutEffect(() => {
     if (!isContextMenuOpen) return;
@@ -91,42 +103,40 @@ export const Expenses = ({ data }: ExpensesProps) => {
             }
           >
             <li>
-              <button
-                type="button"
-                onClick={() => {
-                  const { rowIdx } = contextMenuProps;
-
-                  setContextMenuProps(null);
-                }}
-              >
-                Delete Row
-              </button>
-            </li>
-            <li>
-              <button
-                type="button"
-                onClick={() => {
-                  const { rowIdx } = contextMenuProps;
-                  setContextMenuProps(null);
-                }}
-              >
-                Insert Row Above
-              </button>
-            </li>
-            <li>
-              <button
-                type="button"
-                onClick={() => {
-                  const { rowIdx } = contextMenuProps;
-                  setContextMenuProps(null);
-                }}
-              >
-                Insert Row Below
+              <button type="button" onClick={open}>
+                Set type
               </button>
             </li>
           </menu>,
           document.body
         )}
+
+      <Modal
+        opened={opened}
+        onClose={close}
+        title="Authentication"
+        style={{ left: 0 }}
+      >
+        <TextInput
+          label="Address"
+          data-autofocus
+          placeholder="Enter address"
+          onChange={(el) => setAddress(el.target.value)}
+        />
+        <TextInput
+          label="Type"
+          placeholder="Enter type of the expense"
+          mt="md"
+          onChange={(el) => setType(el.target.value)}
+        />
+        <Button
+          onClick={() => {
+            post(JSON.stringify([{ address, type }]));
+          }}
+        >
+          Insert
+        </Button>
+      </Modal>
     </div>
   );
 };
