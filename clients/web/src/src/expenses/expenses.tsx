@@ -8,6 +8,7 @@ import {
   AppShell,
   Button,
   Container,
+  Flex,
   Header,
   Modal,
   Navbar,
@@ -83,6 +84,20 @@ export const Expenses = ({ info }: ExpensesProps) => {
     };
   }, [isContextMenuOpen]);
 
+  const onDownload = () => {
+    const data = JSON.stringify(info);
+    const base64 = btoa(data);
+
+    const linkSource = `data:application/json;base64,${base64}`;
+    const downloadLink = document.createElement("a");
+    document.body.appendChild(downloadLink);
+
+    downloadLink.href = linkSource;
+    downloadLink.target = "_self";
+    downloadLink.download = "report.json";
+    downloadLink.click();
+  };
+
   return (
     <AppShell
       padding="md"
@@ -93,7 +108,11 @@ export const Expenses = ({ info }: ExpensesProps) => {
       }
       header={
         <Header height={60} p="xs">
-          {/* Header content */}
+          <Flex justify="flex-end" align="center">
+            <Button ml="auto" onClick={onDownload}>
+              Download
+            </Button>
+          </Flex>
         </Header>
       }
       styles={(theme) => ({
