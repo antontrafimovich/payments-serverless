@@ -1,15 +1,19 @@
-import { useContext } from "react";
-import { AppContext } from "../app.provider";
 import {
   Box,
   Button,
   Center,
   Container,
+  Divider,
+  FileButton,
   FileInput,
+  Flex,
   Group,
   Select,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
+import { useContext } from "react";
+
+import { AppContext } from "../app.provider";
 
 export const Loader = () => {
   const { createReport, report } = useContext(AppContext);
@@ -21,9 +25,16 @@ export const Loader = () => {
     },
   });
 
+  const loadReport = (data: File | null) => {
+    console.log(data);
+  };
+
   return (
-    <Center h='100%'>
+    <Center h="100%">
       <Container size="30rem" px={0} my="auto">
+        <Center>
+          <img src="/logo.png" width="240" height="240" />
+        </Center>
         <form
           encType="multipart/form-data"
           onSubmit={form.onSubmit((values: any) => {
@@ -34,7 +45,6 @@ export const Loader = () => {
             createReport?.(formData);
           })}
         >
-          {report && report.pending && "Loading..."}
           <Box maw={320} mx="auto">
             <Select
               w="290px"
@@ -57,14 +67,20 @@ export const Loader = () => {
             <Group position="center" mt="xl">
               <Button
                 type="submit"
-                variant="outline"
                 onClick={() => form.values}
+                loading={report ? report.pending ?? undefined : undefined}
               >
                 Send
               </Button>
             </Group>
           </Box>
         </form>
+        <Divider my="md" label="OR" labelPosition="center" />
+        <Group position="center">
+          <FileButton onChange={loadReport} accept="application/json">
+            {(props) => <Button {...props}>Upload Ready Report</Button>}
+          </FileButton>
+        </Group>
       </Container>
     </Center>
   );
