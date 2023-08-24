@@ -7,9 +7,11 @@ import { createPortal } from "react-dom";
 import {
   AppShell,
   Button,
+  Container,
   Header,
   Modal,
   Navbar,
+  Table,
   TextInput,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
@@ -41,7 +43,7 @@ export const Expenses = ({ info }: ExpensesProps) => {
           ...result,
           [next]: row[idx],
         };
-      }, {});
+      }, {} as Record<string, string>);
     });
 
     return [columns, rows];
@@ -96,76 +98,95 @@ export const Expenses = ({ info }: ExpensesProps) => {
       }
       styles={(theme) => ({
         main: {
-          backgroundColor:
-            theme.colorScheme === "dark"
-              ? theme.colors.dark[8]
-              : theme.colors.gray[0],
+          backgroundColor: "white",
         },
       })}
     >
-      <div className="expenses">
-        <DataGrid
-          columns={columns}
-          rows={rows}
-          onCellContextMenu={({ row }, event) => {
-            event.preventGridDefault();
-            // Do not show the default context menu
-            event.preventDefault();
-            setContextMenuProps({
-              rowIdx: rows.indexOf(row),
-              top: event.clientY,
-              left: event.clientX,
-            });
-          }}
-        />
-        {isContextMenuOpen &&
-          createPortal(
-            <menu
-              ref={menuRef}
-              className="expenses-context-menu"
-              style={
-                {
-                  top: contextMenuProps.top,
-                  left: contextMenuProps.left,
-                } as unknown as React.CSSProperties
-              }
-            >
-              <li>
-                <button type="button" onClick={open}>
-                  Set type
-                </button>
-              </li>
-            </menu>,
-            document.body
-          )}
-
-        <Modal
-          opened={opened}
-          onClose={close}
-          title="Authentication"
-          style={{ left: 0 }}
-        >
-          <TextInput
-            label="Address"
-            data-autofocus
-            placeholder="Enter address"
-            onChange={(el) => setAddress(el.target.value)}
-          />
-          <TextInput
-            label="Type"
-            placeholder="Enter type of the expense"
-            mt="md"
-            onChange={(el) => setType(el.target.value)}
-          />
-          <Button
-            onClick={() => {
-              post(JSON.stringify([{ address, type }]));
-            }}
+      <Table striped withBorder>
+        <thead>
+          <tr>
+            {columns.map(({ key, name, width }) => {
+              return <th key={key}>{name}</th>;
+            })}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row, rowIndex) => {
+            return (
+              <tr key={rowIndex}>
+                {columns.map((column, columnIndex) => {
+                  return (
+                    <td key={`${rowIndex}_${columnIndex}`}>
+                      {row[column.key]}
+                    </td>
+                  );
+                })}
+              </tr>
+            );
+          })}
+        </tbody>
+      </Table>
+      <DataGrid
+        columns={columns}
+        rows={rows}
+        onCellContextMenu={({ row }, event) => {
+          event.preventGridDefault();
+          // Do not show the default context menu
+          event.preventDefault();
+          setContextMenuProps({
+            rowIdx: rows.indexOf(row),
+            top: event.clientY,
+            left: event.clientX,
+          });
+        }}
+      />
+      {isContextMenuOpen &&
+        createPortal(
+          <menu
+            ref={menuRef}
+            className="expenses-context-menu"
+            style={
+              {
+                top: contextMenuProps.top,
+                left: contextMenuProps.left,
+              } as unknown as React.CSSProperties
+            }
           >
-            Insert
-          </Button>
-        </Modal>
-      </div>
+            <li>
+              <button type="button" onClick={open}>
+                Set type
+              </button>
+            </li>
+          </menu>,
+          document.body
+        )}
+
+      <Modal
+        opened={opened}
+        onClose={close}
+        title="Authentication"
+        style={{ left: 0 }}
+      >
+        <TextInput
+          label="Address"
+          data-autofocus
+          placeholder="Enter address"
+          onChange={(el) => setAddress(el.target.value)}
+        />
+        <TextInput
+          label="Type"
+          placeholder="Enter type of the expense"
+          mt="md"
+          onChange={(el) => setType(el.target.value)}
+        />
+        <Button
+          onClick={() => {
+            post(JSON.stringify([{ address, type }]));
+          }}
+        >
+          Insert
+        </Button>
+      </Modal>
     </AppShell>
   );
 };
