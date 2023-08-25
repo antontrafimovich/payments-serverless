@@ -48,7 +48,7 @@ export const usePost = (url: string, settings?: RequestInit) => {
 
   const send = (body: any) => {
     setPending(true);
-    fetch(url, {
+    return fetch(url, {
       ...(settings || {}),
       method: "post",
       body,
@@ -71,6 +71,8 @@ export const usePost = (url: string, settings?: RequestInit) => {
       })
       .then((data) => {
         setData(data);
+
+        return data;
       });
   };
 

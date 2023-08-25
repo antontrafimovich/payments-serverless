@@ -16,7 +16,7 @@ import { useContext } from "react";
 import { AppContext } from "../app.provider";
 
 export const Loader = () => {
-  const { createReport, report } = useContext(AppContext);
+  const { createReport, report, loadReport } = useContext(AppContext);
 
   const form = useForm({
     initialValues: {
@@ -24,10 +24,6 @@ export const Loader = () => {
       report: null,
     },
   });
-
-  const loadReport = (data: File | null) => {
-    console.log(data);
-  };
 
   return (
     <Center h="100%">
@@ -77,7 +73,10 @@ export const Loader = () => {
         </form>
         <Divider my="md" label="OR" labelPosition="center" />
         <Group position="center">
-          <FileButton onChange={loadReport} accept="application/json">
+          <FileButton
+            onChange={loadReport!}
+            accept="application/json"
+          >
             {(props) => <Button {...props}>Upload Ready Report</Button>}
           </FileButton>
         </Group>

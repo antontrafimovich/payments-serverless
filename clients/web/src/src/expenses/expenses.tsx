@@ -121,7 +121,7 @@ export const Expenses = ({ info }: ExpensesProps) => {
         },
       })}
     >
-      <Table striped withBorder>
+      <Table striped withBorder highlightOnHover>
         <thead>
           <tr>
             {columns.map(({ key, name, width }) => {
