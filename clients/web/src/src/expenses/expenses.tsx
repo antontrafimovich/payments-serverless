@@ -3,6 +3,7 @@ import "react-data-grid/lib/styles.css";
 
 import { AppShell, Button, Flex, Header, Navbar, Table } from "@mantine/core";
 import { useMemo } from "react";
+import { download } from "../shared";
 
 export type ExpensesProps = {
   info: {
@@ -33,16 +34,7 @@ export const Expenses = ({ info }: ExpensesProps) => {
 
   const onDownload = () => {
     const data = JSON.stringify(info);
-    const base64 = btoa(data);
-
-    const linkSource = `data:application/json;base64,${base64}`;
-    const downloadLink = document.createElement("a");
-    document.body.appendChild(downloadLink);
-
-    downloadLink.href = linkSource;
-    downloadLink.target = "_self";
-    downloadLink.download = "report.json";
-    downloadLink.click();
+    download(data, "report.json");
   };
 
   return (
