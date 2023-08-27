@@ -1,9 +1,24 @@
 import "./expenses.css";
 import "react-data-grid/lib/styles.css";
 
-import { AppShell, Button, Flex, Header, Navbar, Table } from "@mantine/core";
-import { useMemo } from "react";
+import {
+  AppShell,
+  Button,
+  Flex,
+  Header,
+  Modal,
+  Navbar,
+  Table,
+  Text,
+} from "@mantine/core";
+import { useMemo, useState } from "react";
+
 import { download } from "../shared";
+import {
+  MRT_Column,
+  MantineReactTable,
+  useMantineReactTable,
+} from "mantine-react-table";
 
 export type ExpensesProps = {
   info: {
@@ -12,13 +27,59 @@ export type ExpensesProps = {
   };
 };
 
+type Payment = {
+  Id: string;
+  Value: string;
+  Date: string;
+  Type: string;
+  Counterparty: string;
+};
+
+type EditTypeData = {
+  payment: Payment;
+};
+
 export const Expenses = ({ info }: ExpensesProps) => {
+  const [isModalOpened, toggleModal] = useState<boolean>(false);
+
+  const [editTypeData, setEditTypeData] = useState<EditTypeData | null>(null);
+
   const [columns, rows] = useMemo(() => {
-    const columns = info.headers.map((item) => ({
-      key: item,
-      name: item,
-      width: item === "Counterparty" ? 450 : undefined,
-    }));
+    const columns = info.headers.map((item) => {
+      if (item === "Type") {
+        return {
+          accessorKey: item,
+          header: item,
+          Cell: ({
+            renderedCellValue,
+            row,
+          }: {
+            renderedCellValue: any;
+            row: any;
+          }) => {
+            console.log(row);
+            return !row.original["Type"] ? (
+              <Text component="strong">
+                {renderedCellValue}{" "}
+                <span
+                  onClick={() => setEditTypeData({ payment: row.original })}
+                >
+                  E
+                </span>
+              </Text>
+            ) : (
+              renderedCellValue
+            );
+          },
+          // width: item === "Counterparty" ? 450 : undefined,
+        };
+      }
+      return {
+        accessorKey: item,
+        header: item,
+        // width: item === "Counterparty" ? 450 : undefined,
+      };
+    });
 
     const rows = info.data.map((row) => {
       return info.headers.reduce((result, next, idx) => {
@@ -37,11 +98,26 @@ export const Expenses = ({ info }: ExpensesProps) => {
     download(data, "report.json");
   };
 
+  const table = useMantineReactTable({
+    columns,
+    data: rows, //must be memoized or stable (useState, useMemo, defined outside of this component, etc.)
+    enableRowSelection: true, //enable some features
+    enableTopToolbar: false,
+    enableStickyHeader: true,
+    enableColumnActions: false,
+    createDisplayMode: "modal",
+    initialState: {
+      density: "xs",
+    },
+    enablePagination: false,
+    enableGlobalFilter: false, //turn off a feature
+  });
+
   return (
     <AppShell
       padding="md"
       navbar={
-        <Navbar width={{ base: 40 }} height={500} p="xs">
+        <Navbar width={{ base: 40 }} p="xs">
           {/* Navbar content */}
         </Navbar>
       }
@@ -60,7 +136,8 @@ export const Expenses = ({ info }: ExpensesProps) => {
         },
       })}
     >
-      <Table striped withBorder highlightOnHover>
+      <MantineReactTable table={table} />
+      {/* <Table striped withBorder highlightOnHover>
         <thead>
           <tr>
             {columns.map(({ key, name, width }) => {
@@ -83,7 +160,11 @@ export const Expenses = ({ info }: ExpensesProps) => {
             );
           })}
         </tbody>
-      </Table>
+      </Table> */}
+
+      <Modal opened={!!editTypeData} onClose={close} title="Authentication">
+        {/* Modal content */}
+      </Modal>
     </AppShell>
   );
 };
