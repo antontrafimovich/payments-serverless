@@ -6,7 +6,6 @@ import {
   Divider,
   FileButton,
   FileInput,
-  Flex,
   Group,
   Select,
 } from "@mantine/core";
@@ -73,10 +72,7 @@ export const Loader = () => {
         </form>
         <Divider my="md" label="OR" labelPosition="center" />
         <Group position="center">
-          <FileButton
-            onChange={loadReport!}
-            accept="application/json"
-          >
+          <FileButton onChange={loadReport!} accept="application/json">
             {(props) => <Button {...props}>Upload Ready Report</Button>}
           </FileButton>
         </Group>
