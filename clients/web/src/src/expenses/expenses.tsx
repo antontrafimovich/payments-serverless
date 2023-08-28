@@ -1,24 +1,18 @@
 import "./expenses.css";
-import "react-data-grid/lib/styles.css";
 
 import {
   AppShell,
   Button,
+  Container,
   Flex,
   Header,
-  Modal,
   Navbar,
-  Table,
-  Text,
 } from "@mantine/core";
+import { useResizeObserver } from "@mantine/hooks";
+import { DataTable, DataTableColumn } from "mantine-datatable";
 import { useMemo, useState } from "react";
 
-import { download } from "../shared";
-import {
-  MRT_Column,
-  MantineReactTable,
-  useMantineReactTable,
-} from "mantine-react-table";
+import { download, generateUid } from "../shared";
 
 export type ExpensesProps = {
   info: {
@@ -35,49 +29,15 @@ type Payment = {
   Counterparty: string;
 };
 
-type EditTypeData = {
-  payment: Payment;
-};
-
 export const Expenses = ({ info }: ExpensesProps) => {
-  const [isModalOpened, toggleModal] = useState<boolean>(false);
+  const [ref, rect] = useResizeObserver();
 
-  const [editTypeData, setEditTypeData] = useState<EditTypeData | null>(null);
+  const [selectedRecords, setSelectedRecords] = useState<Payment[]>([]);
 
   const [columns, rows] = useMemo(() => {
-    const columns = info.headers.map((item) => {
-      if (item === "Type") {
-        return {
-          accessorKey: item,
-          header: item,
-          Cell: ({
-            renderedCellValue,
-            row,
-          }: {
-            renderedCellValue: any;
-            row: any;
-          }) => {
-            console.log(row);
-            return !row.original["Type"] ? (
-              <Text component="strong">
-                {renderedCellValue}{" "}
-                <span
-                  onClick={() => setEditTypeData({ payment: row.original })}
-                >
-                  E
-                </span>
-              </Text>
-            ) : (
-              renderedCellValue
-            );
-          },
-          // width: item === "Counterparty" ? 450 : undefined,
-        };
-      }
+    const columns = info.headers.map<DataTableColumn<Payment>>((item) => {
       return {
-        accessorKey: item,
-        header: item,
-        // width: item === "Counterparty" ? 450 : undefined,
+        accessor: item,
       };
     });
 
@@ -85,9 +45,10 @@ export const Expenses = ({ info }: ExpensesProps) => {
       return info.headers.reduce((result, next, idx) => {
         return {
           ...result,
+          id: generateUid(),
           [next]: row[idx],
         };
-      }, {} as Record<string, string>);
+      }, {} as Payment);
     });
 
     return [columns, rows];
@@ -97,21 +58,6 @@ export const Expenses = ({ info }: ExpensesProps) => {
     const data = JSON.stringify(info);
     download(data, "report.json");
   };
-
-  const table = useMantineReactTable({
-    columns,
-    data: rows, //must be memoized or stable (useState, useMemo, defined outside of this component, etc.)
-    enableRowSelection: true, //enable some features
-    enableTopToolbar: false,
-    enableStickyHeader: true,
-    enableColumnActions: false,
-    createDisplayMode: "modal",
-    initialState: {
-      density: "xs",
-    },
-    enablePagination: false,
-    enableGlobalFilter: false, //turn off a feature
-  });
 
   return (
     <AppShell
@@ -130,41 +76,21 @@ export const Expenses = ({ info }: ExpensesProps) => {
           </Flex>
         </Header>
       }
-      styles={(theme) => ({
-        main: {
-          backgroundColor: "white",
-        },
-      })}
     >
-      <MantineReactTable table={table} />
-      {/* <Table striped withBorder highlightOnHover>
-        <thead>
-          <tr>
-            {columns.map(({ key, name, width }) => {
-              return <th key={key}>{name}</th>;
-            })}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row, rowIndex) => {
-            return (
-              <tr key={rowIndex}>
-                {columns.map((column, columnIndex) => {
-                  return (
-                    <td key={`${rowIndex}_${columnIndex}`}>
-                      {row[column.key]}
-                    </td>
-                  );
-                })}
-              </tr>
-            );
-          })}
-        </tbody>
-      </Table> */}
-
-      <Modal opened={!!editTypeData} onClose={close} title="Authentication">
-        {/* Modal content */}
-      </Modal>
+      <Container ref={ref} fluid sx={{ height: "100%" }}>
+        <DataTable
+          withBorder
+          withColumnBorders
+          striped
+          highlightOnHover
+          selectedRecords={selectedRecords}
+          onSelectedRecordsChange={setSelectedRecords}
+          height={rect.height}
+          scrollAreaProps={{ type: "hover" }}
+          columns={columns}
+          records={rows}
+        />
+      </Container>
     </AppShell>
   );
 };
