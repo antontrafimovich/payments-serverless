@@ -6,13 +6,19 @@ import {
   Container,
   Flex,
   Header,
+  Modal,
   Navbar,
+  Text,
+  Select,
+  Group,
+  TextInput,
 } from "@mantine/core";
 import { useResizeObserver } from "@mantine/hooks";
 import { DataTable, DataTableColumn } from "mantine-datatable";
 import { useMemo, useState } from "react";
 
-import { download, generateUid } from "../shared";
+import { apiPaths, download, generateUid, usePost } from "../shared";
+import { useForm } from "@mantine/form";
 
 export type ExpensesProps = {
   info: {
@@ -31,6 +37,10 @@ type Payment = {
 
 export const Expenses = ({ info }: ExpensesProps) => {
   const [ref, rect] = useResizeObserver();
+
+  const { post, pending, data } = usePost(apiPaths.map + "/map");
+
+  const [paymentToModify, setPaymentToModify] = useState<Payment | null>(null);
 
   const [selectedRecords, setSelectedRecords] = useState<Payment[]>([]);
 
@@ -65,6 +75,17 @@ export const Expenses = ({ info }: ExpensesProps) => {
     const data = JSON.stringify(paymentsData);
     download(data, "report.json");
   };
+
+  const form = useForm({
+    initialValues: {
+      address: null,
+      type: "Groceries",
+    },
+  });
+
+  if (!pending && data) {
+    setPaymentToModify(null);
+  }
 
   return (
     <AppShell
@@ -117,6 +138,13 @@ export const Expenses = ({ info }: ExpensesProps) => {
                     );
                   },
                 },
+                {
+                  key: "setType",
+                  title: "Set Type",
+                  onClick: () => {
+                    setPaymentToModify(record);
+                  },
+                },
               ];
             },
           }}
@@ -132,6 +160,41 @@ export const Expenses = ({ info }: ExpensesProps) => {
           records={rows}
         />
       </Container>
+
+      <Modal
+        opened={!!paymentToModify}
+        onClose={() => setPaymentToModify(null)}
+        title="Modify Payment"
+      >
+        <Text>
+          Change payment with description{" "}
+          <Text fw={700}>${paymentToModify?.Counterparty}</Text> which happened
+          on day <Text fw={700}>${paymentToModify?.Date}</Text>
+        </Text>
+
+        <form
+          onSubmit={form.onSubmit((values) => post(JSON.stringify([values])))}
+        >
+          <TextInput
+            {...form.getInputProps("address")}
+            placeholder="Type the counterparty..."
+            label="Counterparty"
+          />
+          <Select
+            label="Type"
+            placeholder="Pick one"
+            {...form.getInputProps("type")}
+            data={[
+              { value: "Home", label: "Home" },
+              { value: "Groceries", label: "Groceries" },
+            ]}
+          />
+
+          <Group align="right">
+            <Button type="submit">Submit</Button>
+          </Group>
+        </form>
+      </Modal>
     </AppShell>
   );
 };
