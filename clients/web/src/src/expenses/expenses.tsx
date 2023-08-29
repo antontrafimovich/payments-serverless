@@ -34,15 +34,22 @@ export const Expenses = ({ info }: ExpensesProps) => {
 
   const [selectedRecords, setSelectedRecords] = useState<Payment[]>([]);
 
-  const [columns, rows] = useMemo(() => {
-    const columns = info.headers.map<DataTableColumn<Payment>>((item) => {
-      return {
-        accessor: item,
-      };
-    });
+  const [paymentsData, setPaymentsData] = useState<{
+    headers: string[];
+    data: string[][];
+  }>(info);
 
-    const rows = info.data.map((row) => {
-      return info.headers.reduce((result, next, idx) => {
+  const [columns, rows] = useMemo(() => {
+    const columns = paymentsData.headers.map<DataTableColumn<Payment>>(
+      (item) => {
+        return {
+          accessor: item,
+        };
+      }
+    );
+
+    const rows = paymentsData.data.map((row) => {
+      return paymentsData.headers.reduce((result, next, idx) => {
         return {
           ...result,
           id: generateUid(),
@@ -52,10 +59,10 @@ export const Expenses = ({ info }: ExpensesProps) => {
     });
 
     return [columns, rows];
-  }, [info]);
+  }, [paymentsData]);
 
   const onDownload = () => {
-    const data = JSON.stringify(info);
+    const data = JSON.stringify(paymentsData);
     download(data, "report.json");
   };
 
@@ -79,6 +86,40 @@ export const Expenses = ({ info }: ExpensesProps) => {
     >
       <Container ref={ref} fluid sx={{ height: "100%" }}>
         <DataTable
+          rowContextMenu={{
+            items: (record: Payment) => {
+              return [
+                {
+                  key: "delete",
+                  color: "red",
+                  title: "Delete",
+                  onClick: () => {
+                    setPaymentsData(
+                      ({
+                        headers,
+                        data,
+                      }: {
+                        headers: string[];
+                        data: string[][];
+                      }) => {
+                        const removedRowIndex = data.findIndex(
+                          ([id]) => id === record.Id
+                        );
+
+                        return {
+                          headers,
+                          data: [
+                            ...data.slice(0, removedRowIndex),
+                            ...data.slice(removedRowIndex + 1),
+                          ],
+                        };
+                      }
+                    );
+                  },
+                },
+              ];
+            },
+          }}
           withBorder
           withColumnBorders
           striped
