@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 export const useGet = (url: string, settings?: RequestInit) => {
   const [error, setError] = useState<{ code: number; message: string } | null>(
@@ -9,26 +9,28 @@ export const useGet = (url: string, settings?: RequestInit) => {
 
   const [pending, setPending] = useState<boolean>(true);
 
-  fetch(import.meta.env.VITE_API_URL + url, settings)
-    .then((response) => {
-      setPending(false);
+  useEffect(() => {
+    fetch(url, settings)
+      .then((response) => {
+        setPending(false);
 
-      if (!response.ok) {
-        setError({
-          code: response.status,
-          message: response.statusText,
-        });
-      }
+        if (!response.ok) {
+          setError({
+            code: response.status,
+            message: response.statusText,
+          });
+        }
 
-      if (response.headers.get("Content-Type") === "application/json") {
-        return response.json();
-      }
+        if (response.headers.get("Content-Type") === "application/json") {
+          return response.json();
+        }
 
-      return response.text();
-    })
-    .then((data) => {
-      setData(data);
-    });
+        return response.text();
+      })
+      .then((data) => {
+        setData(data);
+      });
+  }, [url, settings]);
 
   return {
     pending,

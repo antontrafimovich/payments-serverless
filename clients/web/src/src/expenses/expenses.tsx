@@ -17,7 +17,7 @@ import { useResizeObserver } from "@mantine/hooks";
 import { DataTable, DataTableColumn } from "mantine-datatable";
 import { useEffect, useMemo, useState } from "react";
 
-import { apiPaths, download, generateUid, usePost } from "../shared";
+import { apiPaths, download, generateUid, useGet, usePost } from "../shared";
 import { useForm } from "@mantine/form";
 
 export type ExpensesProps = {
@@ -38,7 +38,9 @@ type Payment = {
 export const Expenses = ({ info }: ExpensesProps) => {
   const [ref, rect] = useResizeObserver();
 
-  const { post, pending, data } = usePost(apiPaths.map + "/map");
+  const { post, pending, data } = usePost(apiPaths.map + "/map/record");
+
+  const { data: options } = useGet(apiPaths.map + "/map/types");
 
   const [paymentToModify, setPaymentToModify] = useState<Payment | null>(null);
 
@@ -195,8 +197,13 @@ export const Expenses = ({ info }: ExpensesProps) => {
       >
         <Text>
           Change payment with description{" "}
-          <Text fw={700}>${paymentToModify?.Counterparty}</Text> which happened
-          on day <Text fw={700}>${paymentToModify?.Date}</Text>
+          <Text span fw={700} inline>
+            {paymentToModify?.Counterparty}
+          </Text>{" "}
+          which happened on day{" "}
+          <Text span fw={700} inline>
+            {paymentToModify?.Date}
+          </Text>
         </Text>
 
         <form
@@ -204,20 +211,22 @@ export const Expenses = ({ info }: ExpensesProps) => {
         >
           <TextInput
             {...form.getInputProps("address")}
+            mt="md"
             placeholder="Type the counterparty..."
             label="Counterparty"
           />
           <Select
             label="Type"
+            mt="md"
             placeholder="Pick one"
             {...form.getInputProps("type")}
-            data={[
-              { value: "Home", label: "Home" },
-              { value: "Groceries", label: "Groceries" },
-            ]}
+            data={options?.map((option: string) => ({
+              value: option,
+              label: option,
+            }))}
           />
 
-          <Group align="right">
+          <Group align="right" mt="md">
             <Button type="submit" loading={pending}>
               Submit
             </Button>
