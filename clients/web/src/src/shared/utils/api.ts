@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 export const useGet = (url: string, settings?: RequestInit) => {
   const [error, setError] = useState<{ code: number; message: string } | null>(
@@ -76,10 +76,13 @@ export const usePost = (url: string, settings?: RequestInit) => {
       });
   };
 
-  return {
-    post: send,
-    pending,
-    data,
-    error,
-  };
+  return useMemo(
+    () => ({
+      post: send,
+      pending,
+      data,
+      error,
+    }),
+    [send, pending, data, error]
+  );
 };

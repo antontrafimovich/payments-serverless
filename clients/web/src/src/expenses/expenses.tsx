@@ -15,7 +15,7 @@ import {
 } from "@mantine/core";
 import { useResizeObserver } from "@mantine/hooks";
 import { DataTable, DataTableColumn } from "mantine-datatable";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { apiPaths, download, generateUid, usePost } from "../shared";
 import { useForm } from "@mantine/form";
@@ -83,9 +83,36 @@ export const Expenses = ({ info }: ExpensesProps) => {
     },
   });
 
-  if (!pending && data) {
-    setPaymentToModify(null);
-  }
+  useEffect(() => {
+    if (!pending && data) {
+      const { address, type } = { address: "Sklepy Doroty", type: "Groceries" };
+
+      setPaymentsData(({ headers, data }) => {
+        const updatedItem = data.findIndex(
+          (item) => item[0] === paymentToModify?.Id
+        );
+
+        const newItem = [
+          ...data[updatedItem].slice(0, 3),
+          type,
+          address,
+        ] as string[];
+
+        return {
+          headers,
+          data: [
+            ...data.slice(0, updatedItem),
+            newItem,
+            ...data.slice(updatedItem + 1),
+          ],
+        };
+      });
+
+      setPaymentToModify(null);
+
+      form.reset();
+    }
+  }, [pending, data]);
 
   return (
     <AppShell
@@ -191,7 +218,9 @@ export const Expenses = ({ info }: ExpensesProps) => {
           />
 
           <Group align="right">
-            <Button type="submit">Submit</Button>
+            <Button type="submit" loading={pending}>
+              Submit
+            </Button>
           </Group>
         </form>
       </Modal>
