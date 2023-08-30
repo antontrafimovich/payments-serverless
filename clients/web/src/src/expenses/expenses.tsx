@@ -85,7 +85,7 @@ export const Expenses = ({ info }: ExpensesProps) => {
 
   useEffect(() => {
     if (!pending && data) {
-      const { address, type } = { address: "Sklepy Doroty", type: "Groceries" };
+      const [{ address, type }] = data;
 
       setPaymentsData(({ headers, data }) => {
         const updatedItem = data.findIndex(
