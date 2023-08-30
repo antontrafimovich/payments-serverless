@@ -32,6 +32,20 @@ export class MapServiceStack extends cdk.Stack {
       }
     );
 
+    const getMapTypesHandler = new lambda.NodejsFunction(
+      this,
+      "GetMapTypesHandler",
+      {
+        entry: "src/get-types/index.ts",
+        handler: "handler",
+        runtime: Runtime.NODEJS_18_X,
+        environment: {
+          NOTION_DATABASE: process.env.NOTION_DATABASE as string,
+          NOTION_KEY: process.env.NOTION_KEY as string,
+        },
+      }
+    );
+
     const gateway = new gw.RestApi(this, "AtPaymentsMapApi", {
       defaultCorsPreflightOptions: {
         allowOrigins: gw.Cors.ALL_ORIGINS,
@@ -40,11 +54,21 @@ export class MapServiceStack extends cdk.Stack {
     });
 
     const getMapIntegration = new gw.LambdaIntegration(getMapHandler);
-    const createMapIntegration = new gw.LambdaIntegration(createMapRecordHandler);
+    const createMapRecordIntegration = new gw.LambdaIntegration(
+      createMapRecordHandler
+    );
+    const getMapTypesIntegration = new gw.LambdaIntegration(
+      getMapTypesHandler
+    );
 
     const mapResource = gateway.root.addResource("map");
 
+    const recordResource = mapResource.addResource("record");
+    const typesResource = mapResource.addResource("types");
+
     mapResource.addMethod("GET", getMapIntegration);
-    mapResource.addMethod("POST", createMapIntegration);
+
+    recordResource.addMethod("POST", createMapRecordIntegration);
+    typesResource.addMethod("GET", getMapTypesIntegration);
   }
 }
