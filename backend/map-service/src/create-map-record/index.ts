@@ -119,7 +119,7 @@ export const handler = async (
 
   return {
     statusCode: 200,
-    body: JSON.stringify(result),
+    body: JSON.stringify(mappings),
     headers: {
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Headers": "*",
