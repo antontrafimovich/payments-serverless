@@ -5,20 +5,31 @@ import {
   Button,
   Container,
   Flex,
+  Group,
   Header,
   Modal,
   Navbar,
-  Text,
   Select,
-  Group,
+  Stack,
+  Text,
   TextInput,
+  Tooltip,
+  UnstyledButton,
 } from "@mantine/core";
+import { useForm } from "@mantine/form";
 import { useResizeObserver } from "@mantine/hooks";
 import { DataTable, DataTableColumn } from "mantine-datatable";
-import { useEffect, useMemo, useState } from "react";
+import { ComponentProps, FC, useEffect, useMemo, useState } from "react";
 
-import { apiPaths, download, generateUid, useGet, usePost } from "../shared";
-import { useForm } from "@mantine/form";
+import {
+  apiPaths,
+  download,
+  generateUid,
+  PivotTableIcon,
+  TableIcon,
+  useGet,
+  usePost,
+} from "../shared";
 
 export type ExpensesProps = {
   info: {
@@ -34,6 +45,28 @@ type Payment = {
   Type: string;
   Counterparty: string;
 };
+
+type NavbarLinkProps = {
+  icon: FC<ComponentProps<"svg">>;
+  label: string;
+};
+
+const NavbarLink = ({ icon: Icon, label }: NavbarLinkProps) => {
+  return (
+    <Tooltip label={label} position="right" transitionProps={{ duration: 0 }}>
+      <UnstyledButton>
+        <Icon />
+      </UnstyledButton>
+    </Tooltip>
+  );
+};
+const actionDescriptors: {
+  icon: React.FC<ComponentProps<"svg">>;
+  label: string;
+}[] = [
+  { icon: TableIcon, label: "Plain" },
+  { icon: PivotTableIcon, label: "Pivot" },
+];
 
 export const Expenses = ({ info }: ExpensesProps) => {
   const [ref, rect] = useResizeObserver();
@@ -116,12 +149,18 @@ export const Expenses = ({ info }: ExpensesProps) => {
     }
   }, [pending, data]);
 
+  const actions = useMemo(() => {
+    return actionDescriptors.map((action) => <NavbarLink {...action} />);
+  }, [actionDescriptors]);
+
   return (
     <AppShell
       padding="md"
       navbar={
-        <Navbar width={{ base: 40 }} p="xs">
-          {/* Navbar content */}
+        <Navbar width={{ base: 40 }} py="xs" px={8}>
+          <Navbar.Section>
+            <Stack>{actions}</Stack>
+          </Navbar.Section>
         </Navbar>
       }
       header={
