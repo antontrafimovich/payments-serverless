@@ -18,20 +18,6 @@ export class MapServiceStack extends cdk.Stack {
       },
     });
 
-    const createMapRecordHandler = new lambda.NodejsFunction(
-      this,
-      "CreateMapRecordHandler",
-      {
-        entry: "src/create-map-record/index.ts",
-        handler: "handler",
-        runtime: Runtime.NODEJS_18_X,
-        environment: {
-          NOTION_DATABASE: process.env.NOTION_DATABASE as string,
-          NOTION_KEY: process.env.NOTION_KEY as string,
-        },
-      }
-    );
-
     const getMapTypesHandler = new lambda.NodejsFunction(
       this,
       "GetMapTypesHandler",
@@ -46,6 +32,24 @@ export class MapServiceStack extends cdk.Stack {
       }
     );
 
+    const createMapRecordHandler = new lambda.NodejsFunction(
+      this,
+      "CreateMapRecordHandler",
+      {
+        entry: "src/create-map-record/index.ts",
+        handler: "handler",
+        runtime: Runtime.NODEJS_18_X,
+        environment: {
+          NOTION_DATABASE: process.env.NOTION_DATABASE as string,
+          NOTION_KEY: process.env.NOTION_KEY as string,
+          REGION: process.env.AWS_REGION as string,
+          GET_TYPES_FUNCTION_NAME: getMapTypesHandler.functionName,
+        },
+      }
+    );
+
+    getMapTypesHandler.grantInvoke(createMapRecordHandler);
+
     const gateway = new gw.RestApi(this, "AtPaymentsMapApi", {
       defaultCorsPreflightOptions: {
         allowOrigins: gw.Cors.ALL_ORIGINS,
@@ -57,9 +61,7 @@ export class MapServiceStack extends cdk.Stack {
     const createMapRecordIntegration = new gw.LambdaIntegration(
       createMapRecordHandler
     );
-    const getMapTypesIntegration = new gw.LambdaIntegration(
-      getMapTypesHandler
-    );
+    const getMapTypesIntegration = new gw.LambdaIntegration(getMapTypesHandler);
 
     const mapResource = gateway.root.addResource("map");
 

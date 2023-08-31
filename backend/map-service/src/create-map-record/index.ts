@@ -1,23 +1,54 @@
+import { InvokeCommand, LambdaClient } from "@aws-sdk/client-lambda";
 import { Client } from "@notionhq/client";
 import { APIGatewayEvent, APIGatewayProxyResult } from "aws-lambda";
-import { array, mixed, object, string, InferType } from "yup";
+import { array, InferType, mixed, object, string } from "yup";
 
-const bodySchema = array(
-  object({
-    address: string().required(),
-    type: mixed<string>().oneOf(["Home", "Groceries"]).required(),
-  })
-).required();
+const getTypes = () => {
+  const client = new LambdaClient({ region: process.env.REGION });
+  const command = new InvokeCommand({
+    FunctionName: process.env.GET_TYPES_FUNCTION_NAME as string,
+    InvocationType: "RequestResponse",
+  });
 
-type Mappings = InferType<typeof bodySchema>;
-
-const validate = (v: unknown) => {
-  return bodySchema.validate(v);
+  return client.send(command);
 };
 
 export const handler = async (
   event: APIGatewayEvent
 ): Promise<APIGatewayProxyResult> => {
+  let types;
+
+  try {
+    const response = await getTypes();
+    const responseString = new TextDecoder().decode(response.Payload);
+    const responseJSON = JSON.parse(responseString);
+
+    types = JSON.parse(responseJSON.body);
+  } catch (err) {
+    console.log(err);
+    return {
+      statusCode: 400,
+      body: "Something wrong with types",
+      headers: {
+        "Content-Type": "text/plain",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Headers": "*",
+        "Access-Control-Allow-Methods": "*",
+      },
+    };
+  }
+
+  const bodySchema = array(
+    object({
+      address: string().required(),
+      type: mixed<string>().oneOf(types).required(),
+    })
+  ).required();
+
+  const validate = (v: unknown) => {
+    return bodySchema.validate(v);
+  };
+
   const client = new Client({
     auth: process.env.NOTION_KEY,
   });
@@ -54,7 +85,7 @@ export const handler = async (
     };
   }
 
-  let mappings: Mappings;
+  let mappings: InferType<typeof bodySchema>;
 
   try {
     mappings = await validate(bodyParams);
@@ -72,8 +103,6 @@ export const handler = async (
       },
     };
   }
-
-  let result;
 
   try {
     const promises = mappings?.map((mapping) => {
@@ -103,7 +132,7 @@ export const handler = async (
       });
     });
 
-    result = await Promise.all(promises);
+    await Promise.all(promises);
   } catch (err) {
     return {
       statusCode: 500,

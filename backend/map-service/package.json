@@ -21,6 +21,7 @@
     "typescript": "~5.0.4"
   },
   "dependencies": {
+    "@aws-sdk/client-lambda": "^3.398.0",
     "@notionhq/client": "^2.2.10",
     "@types/aws-lambda": "^8.10.119",
     "aws-cdk-lib": "2.81.0",
