@@ -134,7 +134,7 @@ export const Expenses = ({ info }: ExpensesProps) => {
         </Header>
       }
     >
-      <Container ref={ref} fluid sx={{ height: "100%" }}>
+      <Container ref={ref} fluid sx={{ height: "100%" }} px={0}>
         <DataTable
           rowContextMenu={{
             items: (record: Payment) => {
