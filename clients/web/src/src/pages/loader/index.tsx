@@ -7,12 +7,12 @@ import {
   FileButton,
   FileInput,
   Group,
-  Select,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useContext } from "react";
 
-import { AppContext } from "../app.provider";
+import { AppContext } from "../../app";
+import { BankSelector } from "../../features";
 
 export const Loader = () => {
   const { createReport, report, loadReport } = useContext(AppContext);
@@ -41,16 +41,7 @@ export const Loader = () => {
           })}
         >
           <Box maw={320} mx="auto">
-            <Select
-              w="290px"
-              label="Select bank"
-              placeholder="Pick one"
-              data={[
-                { value: "pko", label: "PKO" },
-                { value: "millenium", label: "Millenium" },
-              ]}
-              {...form.getInputProps("bank")}
-            />
+            <BankSelector w="290px" {...form.getInputProps("bank")} />
             <FileInput
               w="290px"
               placeholder="Pick file"

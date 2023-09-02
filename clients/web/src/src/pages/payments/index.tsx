@@ -1,5 +1,3 @@
-import "./expenses.css";
-
 import {
   AppShell,
   Button,
@@ -29,7 +27,8 @@ import {
   TableIcon,
   useGet,
   usePost,
-} from "../shared";
+  withHover,
+} from "../../shared";
 
 export type ExpensesProps = {
   info: {
@@ -64,11 +63,11 @@ const actionDescriptors: {
   icon: React.FC<ComponentProps<"svg">>;
   label: string;
 }[] = [
-  { icon: TableIcon, label: "Plain" },
-  { icon: PivotTableIcon, label: "Pivot" },
+  { icon: withHover(TableIcon, "red"), label: "Plain" },
+  { icon: withHover(PivotTableIcon, "red"), label: "Pivot" },
 ];
 
-export const Expenses = ({ info }: ExpensesProps) => {
+export const Payments = ({ info }: ExpensesProps) => {
   const [ref, rect] = useResizeObserver();
 
   const { post, pending, data } = usePost(apiPaths.map + "/map/record");
