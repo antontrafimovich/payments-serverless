@@ -12,7 +12,7 @@ import { useForm } from "@mantine/form";
 import { useContext } from "react";
 
 import { AppContext } from "../../app";
-import { BankSelector } from "../../features";
+import { BankSelector, ReadyReportLoader } from "../../features";
 
 export const Loader = () => {
   const { createReport, report, loadReport } = useContext(AppContext);
@@ -63,9 +63,7 @@ export const Loader = () => {
         </form>
         <Divider my="md" label="OR" labelPosition="center" />
         <Group position="center">
-          <FileButton onChange={loadReport!} accept="application/json">
-            {(props) => <Button {...props}>Upload Ready Report</Button>}
-          </FileButton>
+          <ReadyReportLoader reportLoaded={loadReport!} />
         </Group>
       </Container>
     </Center>
