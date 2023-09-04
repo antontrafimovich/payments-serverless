@@ -9,7 +9,7 @@ function App() {
   const { report } = useContext(AppContext);
 
   if (report && report.data && !report.pending) {
-    return <Payments info={report.data} />;
+    return <Payments report={report.data} />;
   }
 
   return <Loader />;

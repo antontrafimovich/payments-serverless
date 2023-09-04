@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 
+type RequestFn = (...args: any) => Promise<Response>;
+
 export const useGet = (url: string, settings?: RequestInit) => {
   const [error, setError] = useState<{ code: number; message: string } | null>(
     null
@@ -31,6 +33,45 @@ export const useGet = (url: string, settings?: RequestInit) => {
         setData(data);
       });
   }, [url, settings]);
+
+  return {
+    pending,
+    data,
+    error,
+  };
+};
+
+export const useGetNew = (request: RequestFn) => {
+  const [error, setError] = useState<{ code: number; message: string } | null>(
+    null
+  );
+
+  const [data, setData] = useState<any>();
+
+  const [pending, setPending] = useState<boolean>(true);
+
+  useEffect(() => {
+    request()
+      .then((response) => {
+        setPending(false);
+
+        if (!response.ok) {
+          setError({
+            code: response.status,
+            message: response.statusText,
+          });
+        }
+
+        if (response.headers.get("Content-Type") === "application/json") {
+          return response.json();
+        }
+
+        return response.text();
+      })
+      .then((data) => {
+        setData(data);
+      });
+  }, []);
 
   return {
     pending,
@@ -88,8 +129,6 @@ export const usePost = (url: string, settings?: RequestInit) => {
     [send, pending, data, error]
   );
 };
-
-type RequestFn = (...args: any) => Promise<Response>;
 
 export const usePostNew = (request: RequestFn) => {
   const [error, setError] = useState<{ code: number; message: string } | null>(

@@ -1,26 +1,34 @@
-import { createContext, ReactNode, useState } from "react";
+import {
+  createContext,
+  Dispatch,
+  ReactNode,
+  SetStateAction,
+  useState,
+} from "react";
 
-import { usePostNew } from "../../../shared";
+import { Report, usePostNew } from "../../../shared";
 import { createReport as createReportRequest } from "../../../shared";
 
 type AppContext = {
   report: {
     pending: boolean | null;
-    data: { headers: string[]; data: string[][] } | null;
+    data: Report | null;
   } | null;
   createReport: ((report: File, bank: string) => void) | null;
   loadReport: ((v: File | null) => void) | null;
+  setReport: Dispatch<SetStateAction<Report | null>> | null;
 };
 
 export const AppContext = createContext<AppContext>({
   report: null,
   createReport: null,
   loadReport: null,
+  setReport: null,
 });
 
 export const withAppProvider = (Component: () => ReactNode) => {
   return () => {
-    const [data, setData] = useState<any>(null);
+    const [data, setData] = useState<Report | null>(null);
 
     const { post, pending } = usePostNew(createReportRequest);
 
@@ -55,6 +63,7 @@ export const withAppProvider = (Component: () => ReactNode) => {
 
             reader.readAsDataURL(file);
           },
+          setReport: setData,
         }}
       >
         <Component />
