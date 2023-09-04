@@ -1,13 +1,14 @@
 import { createContext, ReactNode, useState } from "react";
 
-import { apiPaths, usePost } from "../../../shared";
+import { usePostNew } from "../../../shared";
+import { createReport as createReportRequest } from "../../../shared";
 
 type AppContext = {
   report: {
     pending: boolean | null;
     data: { headers: string[]; data: string[][] } | null;
   } | null;
-  createReport: ((v: FormData) => void) | null;
+  createReport: ((report: File, bank: string) => void) | null;
   loadReport: ((v: File | null) => void) | null;
 };
 
@@ -21,14 +22,14 @@ export const withAppProvider = (Component: () => ReactNode) => {
   return () => {
     const [data, setData] = useState<any>(null);
 
-    const { post, pending } = usePost(apiPaths.report + "/report");
+    const { post, pending } = usePostNew(createReportRequest);
 
     return (
       <AppContext.Provider
         value={{
           report: { pending, data },
-          createReport: (formData: FormData) => {
-            post(formData).then((data) => setData(data));
+          createReport: (report: File, bank: string) => {
+            post(report, bank).then((data) => setData(data));
           },
           loadReport: (file: File | null) => {
             if (!file) {

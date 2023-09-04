@@ -4,7 +4,6 @@ import {
   Center,
   Container,
   Divider,
-  FileButton,
   FileInput,
   Group,
 } from "@mantine/core";
@@ -33,11 +32,7 @@ export const Loader = () => {
         <form
           encType="multipart/form-data"
           onSubmit={form.onSubmit((values: any) => {
-            const formData = new FormData();
-            formData.append("bank", values.bank);
-            formData.append("report", values.report);
-
-            createReport?.(formData);
+            createReport?.(values.report, values.bank);
           })}
         >
           <Box maw={320} mx="auto">
