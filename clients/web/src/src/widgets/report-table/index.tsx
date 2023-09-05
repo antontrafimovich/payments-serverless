@@ -13,10 +13,12 @@ import {
 import { Payment } from "./model";
 import { useForm } from "@mantine/form";
 import { Button, Group, Modal, Select, Text, TextInput } from "@mantine/core";
+import { useData } from "./lib";
 
 export type ReportTableProps = {
   height: number;
   report: Report;
+  mode?: "plain" | "pivot";
 };
 
 export const ReportTable = ({ height, report }: ReportTableProps) => {
@@ -34,25 +36,14 @@ export const ReportTable = ({ height, report }: ReportTableProps) => {
     },
   });
 
-  const [columns, rows] = useMemo(() => {
-    const columns = report.headers.map<DataTableColumn<Payment>>((item) => {
-      return {
-        accessor: item,
-      };
-    });
+  const [columns, rows] = useData({
+    report,
+    columns: ["Type"],
+    rows: ["Date"],
+    values: ["Value"],
+  });
 
-    const rows = report.data.map((row) => {
-      return report.headers.reduce((result, next, idx) => {
-        return {
-          ...result,
-          id: generateUid(),
-          [next]: row[idx],
-        };
-      }, {} as Payment);
-    });
-
-    return [columns, rows];
-  }, [report]);
+  console.log(rows);
 
   useEffect(() => {
     if (!pending && data) {
