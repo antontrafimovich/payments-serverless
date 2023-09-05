@@ -1,19 +1,18 @@
-import { DataTable, DataTableColumn } from "mantine-datatable";
-import { useContext, useEffect, useMemo, useState } from "react";
+import { Button, Group, Modal, Select, Text, TextInput } from "@mantine/core";
+import { useForm } from "@mantine/form";
+import { DataTable } from "mantine-datatable";
+import { useContext, useEffect, useState } from "react";
 
 import { AppContext } from "../../app";
 import {
-  Report,
   createMapRecord,
-  generateUid,
   getMapTypes,
+  Report,
   useGetNew,
   usePostNew,
 } from "../../shared";
-import { Payment } from "./model";
-import { useForm } from "@mantine/form";
-import { Button, Group, Modal, Select, Text, TextInput } from "@mantine/core";
 import { useData } from "./lib";
+import { Payment, Row } from "./model";
 
 export type ReportTableProps = {
   height: number;
@@ -42,8 +41,6 @@ export const ReportTable = ({ height, report }: ReportTableProps) => {
     rows: ["Date"],
     values: ["Value"],
   });
-
-  console.log(rows);
 
   useEffect(() => {
     if (!pending && data) {
@@ -86,7 +83,7 @@ export const ReportTable = ({ height, report }: ReportTableProps) => {
     <>
       <DataTable
         rowContextMenu={{
-          items: (record: Payment) => {
+          items: (record: Row) => {
             return [
               {
                 key: "delete",
@@ -118,7 +115,7 @@ export const ReportTable = ({ height, report }: ReportTableProps) => {
                 key: "setType",
                 title: "Set Type",
                 onClick: () => {
-                  setPaymentToModify(record);
+                  setPaymentToModify(record as any);
                 },
               },
             ];
