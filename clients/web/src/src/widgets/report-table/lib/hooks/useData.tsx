@@ -1,7 +1,11 @@
-import { useMemo } from "react";
-import { Report, generateUid } from "../../../../shared";
+import { Flex, Text } from "@mantine/core";
 import { DataTableColumn } from "mantine-datatable";
-import { Payment } from "../../model";
+import { useMemo } from "react";
+
+import { generateUid, Report, toAction, TogglerIcon } from "../../../../shared";
+import { Row } from "../../model";
+
+const ToggerIconAction = toAction(TogglerIcon);
 
 export type UseDataProps = {
   report: Report;
@@ -43,27 +47,33 @@ const getSumOfValuesByPropIndex = (
   }, 0);
 };
 
-type HierarhcyRow = Record<string, any> & { hierarchyValue: string };
-
-export const useData = ({ report, columns, rows, values }: UseDataProps) => {
+export const useData = ({
+  report,
+  columns,
+  rows,
+  values,
+}: UseDataProps): [DataTableColumn<Row>[], Row[]] => {
   // rows = ['Date', 'Id'], columns = ['Counterparty'], values = ['Value']
 
   return useMemo(() => {
     if (!columns && !rows) {
-      const columns = report.headers.map<DataTableColumn<Payment>>((item) => {
+      const columns = report.headers.map<DataTableColumn<Row>>((item) => {
         return {
           accessor: item,
         };
       });
 
       const rows = report.data.map((row) => {
-        return report.headers.reduce((result, next, idx) => {
-          return {
-            ...result,
-            id: generateUid(),
-            [next]: row[idx],
-          };
-        }, {} as Payment);
+        return report.headers.reduce(
+          (result, next, idx) => {
+            return {
+              ...result,
+              id: generateUid(),
+              [next]: row[idx],
+            };
+          },
+          { id: generateUid() } as Row
+        );
       });
 
       return [columns, rows];
@@ -75,15 +85,38 @@ export const useData = ({ report, columns, rows, values }: UseDataProps) => {
       (header) => header === columnValue
     );
 
-    const hierarhcyColumn: DataTableColumn<HierarhcyRow> = {
+    const hierarhcyColumn: DataTableColumn<Row> = {
       accessor: "hierarchyValue",
+      cellsStyle: ({ isLeaf }) => {
+        return {
+          paddingLeft: isLeaf ? "24px" : "8px",
+          background: !isLeaf ? "red" : undefined,
+          opacity: !isLeaf ? 0.75 : undefined,
+        };
+      },
+
+      render: (record: Row) => {
+        return (
+          <Flex
+            align="center"
+            justify="flex-start"
+            // sx={{ "& > * + *": { marginLeft: "4px" } }}
+            pl={record.level * 16}
+          >
+            {!record.isLeaf && <ToggerIconAction />}
+            <Text fw={record.isLeaf ? "normal" : "bold"} inline>
+              {record["hierarchyValue"]}
+            </Text>
+          </Flex>
+        );
+      },
     };
 
     const uniqueColumnValues = Array.from(
       new Set(report.data.map((item) => item[columnValueIndex]))
     );
 
-    const resultColumns = [
+    const resultColumns: DataTableColumn<Row>[] = [
       hierarhcyColumn,
       ...uniqueColumnValues.map((value) => {
         return {
@@ -103,10 +136,10 @@ export const useData = ({ report, columns, rows, values }: UseDataProps) => {
 
     const idFieldIndex = report.headers.findIndex((header) => header === "Id");
 
-    const resultData = Object.keys(groupedRows).reduce<HierarhcyRow[]>(
+    const resultData = Object.keys(groupedRows).reduce<Row[]>(
       (result, next) => {
-        const subtotalRow: HierarhcyRow = uniqueColumnValues.reduce(
-          (row, column, index) => {
+        const subtotalRow: Row = uniqueColumnValues.reduce(
+          (row, column) => {
             return {
               ...row,
               [column ?? "Empty"]: getSumOfValuesByPropIndex(
@@ -118,16 +151,23 @@ export const useData = ({ report, columns, rows, values }: UseDataProps) => {
           },
           {
             hierarchyValue: next,
+            id: generateUid(),
+            level: 0,
+            isLeaf: false,
           }
         );
 
-        const hierarchyRows: HierarhcyRow[] = groupedRows[next].map((row) => {
+        const hierarchyRows: Row[] = groupedRows[next].map((row) => {
           return {
             hierarchyValue: row[idFieldIndex],
+            id: generateUid(),
+            level: 1,
+            isLeaf: true,
             ...uniqueColumnValues.reduce((map, column) => {
               return {
                 ...map,
-                [column ?? "Empty"]: row[columnValueIndex] === column ? row[1] : null,
+                [column ?? "Empty"]:
+                  row[columnValueIndex] === column ? row[1] : null,
               };
             }, {}),
           };
