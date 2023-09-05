@@ -12,6 +12,7 @@ import { useContext } from "react";
 
 import { AppContext } from "../../app";
 import { BankSelector, ReadyReportLoader } from "../../features";
+import { Logo } from "../../shared";
 
 export const Loader = () => {
   const { createReport, report, loadReport } = useContext(AppContext);
@@ -26,8 +27,8 @@ export const Loader = () => {
   return (
     <Center h="100%">
       <Container size="30rem" px={0} my="auto">
-        <Center>
-          <img src="/logo.png" width="240" height="240" />
+        <Center mb="md">
+          <Logo style={{ width: "247.4px", height: "228.69px" }} />
         </Center>
         <form
           encType="multipart/form-data"

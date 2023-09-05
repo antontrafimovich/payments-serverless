@@ -10,10 +10,12 @@ import {
   UnstyledButton,
 } from "@mantine/core";
 import { useResizeObserver } from "@mantine/hooks";
-import { ComponentProps, FC, useCallback, useMemo } from "react";
+import { ComponentProps, FC, useCallback, useContext, useMemo } from "react";
 
+import { AppContext } from "../../app";
 import {
   download,
+  Logo,
   PivotTableIcon,
   Report,
   TableIcon,
@@ -50,6 +52,8 @@ const actionDescriptors: {
 export const Payments = ({ report }: ExpensesProps) => {
   const [ref, rect] = useResizeObserver();
 
+  const { setReport } = useContext(AppContext);
+
   const onDownload = useCallback(() => {
     const data = JSON.stringify(report);
     download(data, "report.json");
@@ -71,7 +75,13 @@ export const Payments = ({ report }: ExpensesProps) => {
       }
       header={
         <Header height={60} p="xs">
-          <Flex justify="flex-end" align="center">
+          <Flex justify="space-between" align="center">
+            <Logo
+              onClick={() => setReport!(null)}
+              type="horizontal"
+              style={{ width: "171.6px", height: "38.62px" }}
+            />
+
             <Button ml="auto" onClick={onDownload}>
               Download
             </Button>
