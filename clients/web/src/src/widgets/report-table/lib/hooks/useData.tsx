@@ -90,8 +90,9 @@ export const useData = ({
       cellsStyle: ({ isLeaf }) => {
         return {
           paddingLeft: isLeaf ? "24px" : "8px",
-          background: !isLeaf ? "red" : undefined,
-          opacity: !isLeaf ? 0.75 : undefined,
+          background: !isLeaf ? "rgba(141, 135, 155, 0.4)" : undefined,
+          fontWeight: isLeaf ? "normal" : "bold",
+          // opacity: !isLeaf ? 0.75 : undefined,
         };
       },
 
@@ -104,9 +105,7 @@ export const useData = ({
             pl={record.level * 16}
           >
             {!record.isLeaf && <ToggerIconAction />}
-            <Text fw={record.isLeaf ? "normal" : "bold"} inline>
-              {record["hierarchyValue"]}
-            </Text>
+            <Text inline>{record["hierarchyValue"]}</Text>
           </Flex>
         );
       },
@@ -121,6 +120,13 @@ export const useData = ({
       ...uniqueColumnValues.map((value) => {
         return {
           accessor: value ?? "Empty",
+          cellsStyle: ({ isLeaf }: Row) => {
+            return {
+              background: !isLeaf ? "rgba(141, 135, 155, 0.4)" : undefined,
+              fontWeight: isLeaf ? "normal" : "bold",
+              // opacity: !isLeaf ? 0.75 : undefined,
+            };
+          },
         };
       }),
     ];
@@ -134,7 +140,7 @@ export const useData = ({
 
     const groupedRows = groupBy(report.data, groupingValueIndex);
 
-    const idFieldIndex = report.headers.findIndex((header) => header === "Id");
+    const counterpartyFieldIndex = report.headers.findIndex((header) => header === "Counterparty");
 
     const resultData = Object.keys(groupedRows).reduce<Row[]>(
       (result, next) => {
@@ -146,7 +152,7 @@ export const useData = ({
                 groupedRows[next],
                 columnValueIndex,
                 column
-              ),
+              ).toFixed(2),
             };
           },
           {
@@ -159,7 +165,7 @@ export const useData = ({
 
         const hierarchyRows: Row[] = groupedRows[next].map((row) => {
           return {
-            hierarchyValue: row[idFieldIndex],
+            hierarchyValue: row[counterpartyFieldIndex],
             id: generateUid(),
             level: 1,
             isLeaf: true,
