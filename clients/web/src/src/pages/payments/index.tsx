@@ -10,7 +10,14 @@ import {
   UnstyledButton,
 } from "@mantine/core";
 import { useResizeObserver } from "@mantine/hooks";
-import { ComponentProps, FC, useCallback, useContext, useMemo } from "react";
+import {
+  ComponentProps,
+  FC,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+} from "react";
 
 import { AppContext } from "../../app";
 import {
@@ -30,12 +37,15 @@ export type ExpensesProps = {
 type NavbarLinkProps = {
   icon: FC<ComponentProps<"svg">>;
   label: string;
+  onClick: (link: NavbarLinkProps) => void;
 };
 
-const NavbarLink = ({ icon: Icon, label }: NavbarLinkProps) => {
+const NavbarLink = (props: NavbarLinkProps) => {
+  const { icon: Icon, label, onClick } = props;
+
   return (
     <Tooltip label={label} position="right" transitionProps={{ duration: 0 }}>
-      <UnstyledButton>
+      <UnstyledButton onClick={() => onClick(props)}>
         <Icon />
       </UnstyledButton>
     </Tooltip>
@@ -54,13 +64,22 @@ export const Payments = ({ report }: ExpensesProps) => {
 
   const { setReport } = useContext(AppContext);
 
+  const [mode, setMode] = useState<"plain" | "pivot">("plain");
+
   const onDownload = useCallback(() => {
     const data = JSON.stringify(report);
     download(data, "report.json");
   }, [report]);
 
   const actions = useMemo(() => {
-    return actionDescriptors.map((action) => <NavbarLink {...action} />);
+    return actionDescriptors.map((action) => (
+      <NavbarLink
+        {...action}
+        onClick={(descriptor) =>
+          setMode(descriptor.label === "Plain" ? "plain" : "pivot")
+        }
+      />
+    ));
   }, [actionDescriptors]);
 
   return (
@@ -90,7 +109,7 @@ export const Payments = ({ report }: ExpensesProps) => {
       }
     >
       <Container ref={ref} fluid sx={{ height: "100%" }} px={0}>
-        <ReportTable report={report} height={rect.height} />
+        <ReportTable mode={mode} report={report} height={rect.height} />
       </Container>
     </AppShell>
   );

@@ -9,9 +9,9 @@ const ToggerIconAction = toAction(TogglerIcon);
 
 export type UseDataProps = {
   report: Report;
-  columns: string[];
-  rows: string[];
-  values: string[];
+  columns: string[] | null;
+  rows: string[] | null;
+  values: string[] | null;
 };
 
 const groupBy = (
@@ -56,7 +56,7 @@ export const useData = ({
   // rows = ['Date', 'Id'], columns = ['Counterparty'], values = ['Value']
 
   return useMemo(() => {
-    if (!columns && !rows) {
+    if (columns === null || rows === null) {
       const columns = report.headers.map<DataTableColumn<Row>>((item) => {
         return {
           accessor: item,
@@ -120,6 +120,7 @@ export const useData = ({
       ...uniqueColumnValues.map((value) => {
         return {
           accessor: value ?? "Empty",
+
           cellsStyle: ({ isLeaf }: Row) => {
             return {
               background: !isLeaf ? "rgba(141, 135, 155, 0.4)" : undefined,
@@ -140,7 +141,9 @@ export const useData = ({
 
     const groupedRows = groupBy(report.data, groupingValueIndex);
 
-    const counterpartyFieldIndex = report.headers.findIndex((header) => header === "Counterparty");
+    const counterpartyFieldIndex = report.headers.findIndex(
+      (header) => header === "Counterparty"
+    );
 
     const resultData = Object.keys(groupedRows).reduce<Row[]>(
       (result, next) => {

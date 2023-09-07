@@ -20,7 +20,7 @@ export type ReportTableProps = {
   mode?: "plain" | "pivot";
 };
 
-export const ReportTable = ({ height, report }: ReportTableProps) => {
+export const ReportTable = ({ height, report, mode }: ReportTableProps) => {
   const { setReport } = useContext(AppContext);
 
   const { post, pending, data } = usePostNew(createMapRecord);
@@ -37,9 +37,9 @@ export const ReportTable = ({ height, report }: ReportTableProps) => {
 
   const [columns, rows] = useData({
     report,
-    columns: ["Type"],
-    rows: ["Date"],
-    values: ["Value"],
+    columns: mode === "plain" ? null : ["Type"],
+    rows: mode === "plain" ? null : ["Date"],
+    values: mode === "plain" ? null : ["Value"],
   });
 
   useEffect(() => {
