@@ -55,8 +55,8 @@ const actionDescriptors: {
   icon: React.FC<ComponentProps<"svg">>;
   label: string;
 }[] = [
-  { icon: withHover(TableIcon, "red"), label: "Plain" },
-  { icon: withHover(PivotTableIcon, "red"), label: "Pivot" },
+  { icon: withHover(TableIcon, "#333333"), label: "Plain" },
+  { icon: withHover(PivotTableIcon, "#333333"), label: "Pivot" },
 ];
 
 export const Payments = ({ report }: ExpensesProps) => {
