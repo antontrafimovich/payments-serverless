@@ -11,7 +11,7 @@ const getAddress = (item: string[]) => {
 };
 
 export const parse = (csv: string[][]) => {
-  const [header, ...rows] = csv;
+  const [_, ...rows] = csv;
 
   return rows.reduce((result, next) => {
     const [, date, , value] = next;
