@@ -91,7 +91,9 @@ export const handler = async (
     const shopInfo = shopsMetadata.find((shopInfo) => {
       const addressWords = shopInfo.address.split(" ");
 
-      return addressWords.every((word) => item.address.includes(word));
+      return addressWords.every((word) =>
+        item.address.toLowerCase().includes(word.toLowerCase())
+      );
     });
 
     let counterparty = shopInfo?.address;
@@ -102,11 +104,6 @@ export const handler = async (
 
     return [index, item.value, item.date, shopInfo?.type, counterparty];
   });
-
-  // const csv = toCsv(
-  //   ["Id", "Value", "Date", "Type", "Counterparty"],
-  //   resultData
-  // );
 
   return toResponse({
     statusCode: 200,
