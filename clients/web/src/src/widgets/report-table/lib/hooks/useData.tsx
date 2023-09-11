@@ -51,7 +51,6 @@ export const useData = ({
   report,
   columns,
   rows,
-  values,
 }: UseDataProps): [DataTableColumn<Row>[], Row[]] => {
   // rows = ['Date', 'Id'], columns = ['Counterparty'], values = ['Value']
 
