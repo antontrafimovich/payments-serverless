@@ -3,6 +3,10 @@ const getValueFromPayment = (payment: string[]) => {
 };
 
 const getCptyDescription = (payment: string[]) => {
+  if (!payment[5] || !payment[6]) {
+    return null;
+  }
+
   return `${payment[5]} ${payment[6]}`;
 };
 
