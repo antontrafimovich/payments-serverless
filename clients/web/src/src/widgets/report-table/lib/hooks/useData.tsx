@@ -57,7 +57,26 @@ export const useData = ({
   return useMemo(() => {
     if (columns === null || rows === null) {
       const columns = report.headers.map<DataTableColumn<Row>>((item) => {
+        let props = {};
+
+        if (item === "Id") {
+          props = { ...props, width: 54 };
+        }
+
+        if (item === "Value") {
+          props = { ...props, width: 137 };
+        }
+
+        if (item === "Date") {
+          props = { ...props, width: 141 };
+        }
+
+        if (item === "Type") {
+          props = { ...props, width: 165 };
+        }
+
         return {
+          ...props,
           accessor: item,
         };
       });
