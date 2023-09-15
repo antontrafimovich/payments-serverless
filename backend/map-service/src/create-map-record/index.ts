@@ -1,17 +1,8 @@
-import { InvokeCommand, LambdaClient } from "@aws-sdk/client-lambda";
 import { Client } from "@notionhq/client";
 import { APIGatewayEvent, APIGatewayProxyResult } from "aws-lambda";
 import { array, InferType, mixed, object, string } from "yup";
 
-const getTypes = () => {
-  const client = new LambdaClient({ region: process.env.REGION });
-  const command = new InvokeCommand({
-    FunctionName: process.env.GET_TYPES_FUNCTION_NAME as string,
-    InvocationType: "RequestResponse",
-  });
-
-  return client.send(command);
-};
+import { getTypes } from "./types";
 
 export const handler = async (
   event: APIGatewayEvent
@@ -19,11 +10,7 @@ export const handler = async (
   let types;
 
   try {
-    const response = await getTypes();
-    const responseString = new TextDecoder().decode(response.Payload);
-    const responseJSON = JSON.parse(responseString);
-
-    types = JSON.parse(responseJSON.body);
+    types = await getTypes();
   } catch (err) {
     console.log(err);
     return {
@@ -67,8 +54,6 @@ export const handler = async (
   }
 
   let bodyParams;
-
-  console.log(event);
 
   try {
     bodyParams = JSON.parse(event.body);
