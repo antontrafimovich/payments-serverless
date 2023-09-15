@@ -89,17 +89,20 @@ export const handler = async (
 
   const resultData = paymentsData.map((item, index) => {
     const shopInfo = shopsMetadata.find((shopInfo) => {
-      const addressWords = shopInfo.address.split(" ");
+      const [address] = shopInfo.address.split(" /// ");
+      const addressWords = address.split(" ");
 
       return addressWords.every((word) =>
         item.address.toLowerCase().includes(word.toLowerCase())
       );
     });
 
-    let counterparty = shopInfo?.address;
+    let counterparty = item.address;
 
-    if (!shopInfo) {
-      counterparty = item.address;
+    if (shopInfo) {
+      const [address, alias] = shopInfo.address.split(" /// ");
+
+      counterparty = alias ?? address;
     }
 
     return [index, item.value, item.date, shopInfo?.type, counterparty];
