@@ -146,9 +146,7 @@ export const ReportTable = ({ height, report, mode }: ReportTableProps) => {
           </Text>
         </Text>
 
-        <form
-          onSubmit={form.onSubmit((values) => post(JSON.stringify([values])))}
-        >
+        <form onSubmit={form.onSubmit((values) => post([values]))}>
           <TextInput
             {...form.getInputProps("address")}
             mt="md"
