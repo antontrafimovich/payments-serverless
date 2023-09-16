@@ -1,6 +1,8 @@
 import { merge } from "../../src/merge";
 
 describe("merge", () => {
+  expect.hasAssertions();
+
   it("should correctly merge payments and shop metadata with alias", () => {
     const PAYMENTS_INFO = [
       {
@@ -10,16 +12,16 @@ describe("merge", () => {
         value: "-75",
       },
     ];
-
     const SHOPS_INFO = [
       {
         address: "KSK Krystian Sienko /// ZABKA",
         type: "Groceries",
       },
     ];
+    const MERGE_RESULT = [[0, "-75", "1/9/2023", "Groceries", "ZABKA"]];
 
     const result = merge(PAYMENTS_INFO, SHOPS_INFO);
 
-    console.log(result);
+    expect(result).toEqual(MERGE_RESULT);
   });
 });

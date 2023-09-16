@@ -35,8 +35,6 @@ export const handler = async (
     return stringToError("File hasn't been provided.", 400);
   }
 
-  console.log(formData);
-
   const parsedData = parseFormData(formData, event.headers["content-type"]);
 
   if (parsedData === null) {
