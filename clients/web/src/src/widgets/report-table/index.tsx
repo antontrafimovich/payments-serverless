@@ -157,6 +157,8 @@ export const ReportTable = ({ height, report, mode }: ReportTableProps) => {
             label="Type"
             mt="md"
             placeholder="Pick one"
+            withinPortal
+            dropdownPosition="bottom"
             {...form.getInputProps("type")}
             data={options?.map((option: string) => ({
               value: option,
