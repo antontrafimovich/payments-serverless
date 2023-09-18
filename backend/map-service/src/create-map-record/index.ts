@@ -1,7 +1,7 @@
-import { Client } from "@notionhq/client";
 import { APIGatewayEvent, APIGatewayProxyResult } from "aws-lambda";
 import { array, InferType, mixed, object, string } from "yup";
 
+import { createNotionStorage } from "./storage";
 import { getTypes } from "./types";
 
 export const handler = async (
@@ -36,8 +36,8 @@ export const handler = async (
     return bodySchema.validate(v);
   };
 
-  const client = new Client({
-    auth: process.env.NOTION_KEY,
+  const storage = createNotionStorage({
+    key: process.env.NOTION_KEY as string,
   });
 
   if (event.body === null) {
@@ -90,32 +90,7 @@ export const handler = async (
   }
 
   try {
-    const promises = mappings?.map((mapping) => {
-      return client.pages.create({
-        parent: {
-          database_id: process.env.NOTION_DATABASE as string,
-        },
-        properties: {
-          Address: {
-            type: "title",
-            title: [
-              {
-                type: "text",
-                text: {
-                  content: mapping.address,
-                },
-              },
-            ],
-          },
-          Type: {
-            type: "select",
-            select: {
-              name: mapping.type,
-            },
-          },
-        },
-      });
-    });
+    const promises = mappings?.map(storage.post);
 
     await Promise.all(promises);
   } catch (err) {
