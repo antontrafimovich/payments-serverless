@@ -1,4 +1,5 @@
 import {
+  Anchor,
   AppShell,
   Button,
   Container,
@@ -24,6 +25,7 @@ import {
   download,
   Logo,
   PivotTableIcon,
+  popupCenter,
   Report,
   TableIcon,
   withHover,
@@ -100,7 +102,19 @@ export const Payments = ({ report }: ExpensesProps) => {
               type="horizontal"
               style={{ width: "171.6px", height: "38.62px" }}
             />
-
+            Link
+            <Button
+              onClick={() =>
+                popupCenter({
+                  url: "http://localhost:3000/auth",
+                  title: "Google Auth",
+                  w: 520,
+                  h: 570,
+                })
+              }
+            >
+              Login
+            </Button>
             <Button ml="auto" onClick={onDownload}>
               Download
             </Button>
