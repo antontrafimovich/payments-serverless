@@ -1,5 +1,4 @@
 import {
-  Anchor,
   AppShell,
   Button,
   Container,
@@ -10,12 +9,13 @@ import {
   Tooltip,
   UnstyledButton,
 } from "@mantine/core";
-import { useResizeObserver } from "@mantine/hooks";
+import { useLocalStorage, useResizeObserver } from "@mantine/hooks";
 import {
   ComponentProps,
   FC,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
 } from "react";
@@ -63,6 +63,9 @@ const actionDescriptors: {
 
 export const Payments = ({ report }: ExpensesProps) => {
   const [ref, rect] = useResizeObserver();
+  const [token] = useLocalStorage({ key: "token" });
+
+  const [userInfo, setUserInfo] = useState<any>(null);
 
   const { setReport } = useContext(AppContext);
 
@@ -72,6 +75,16 @@ export const Payments = ({ report }: ExpensesProps) => {
     const data = JSON.stringify(report);
     download(data, "report.json");
   }, [report]);
+
+  useEffect(() => {
+    fetch("http://localhost:3000/user-info", {
+      headers: {
+        authorization: `Bearer ${token}`,
+      },
+    })
+      .then((data) => data.json())
+      .then((data) => setUserInfo(data.data));
+  }, [token]);
 
   const actions = useMemo(() => {
     return actionDescriptors.map((action) => (
@@ -102,7 +115,6 @@ export const Payments = ({ report }: ExpensesProps) => {
               type="horizontal"
               style={{ width: "171.6px", height: "38.62px" }}
             />
-            Link
             <Button
               onClick={() =>
                 popupCenter({
@@ -115,6 +127,19 @@ export const Payments = ({ report }: ExpensesProps) => {
             >
               Login
             </Button>
+            <Button
+              onClick={() =>
+                fetch("http://localhost:3000/sheet", {
+                  method: "POST",
+                  headers: {
+                    authorization: `Bearer ${localStorage.getItem("token")!}`,
+                  },
+                })
+              }
+            >
+              Create Sheet
+            </Button>
+            {userInfo?.name || "Noname"}
             <Button ml="auto" onClick={onDownload}>
               Download
             </Button>
