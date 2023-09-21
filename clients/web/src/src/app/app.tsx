@@ -1,18 +1,8 @@
-import { useContext } from "react";
-
-import { Loader } from "../pages/loader";
-import { Payments } from "../pages/payments";
+import { Routing } from "../pages/routing";
 import { withProviders } from "./providers";
-import { AppContext } from "./providers/app";
 
 function App() {
-  const { report } = useContext(AppContext);
-
-  if (report && report.data && !report.pending) {
-    return <Payments report={report.data} />;
-  }
-
-  return <Loader />;
+  return <Routing />;
 }
 
 export default withProviders(App);
