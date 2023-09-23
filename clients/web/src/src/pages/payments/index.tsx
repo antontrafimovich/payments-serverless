@@ -118,7 +118,7 @@ export const Payments = ({ report }: ExpensesProps) => {
             <Button
               onClick={() =>
                 popupCenter({
-                  url: "http://localhost:3000/auth",
+                  url: "https://7nbmfhr8y9.execute-api.eu-central-1.amazonaws.com/prod/auth",
                   title: "Google Auth",
                   w: 520,
                   h: 570,
