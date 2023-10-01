@@ -2,24 +2,24 @@ import { APIGatewayEvent, APIGatewayProxyResult } from "aws-lambda";
 
 import { createAuthService } from "../shared";
 
-const authService = createAuthService({
-  clientId: process.env.GOOGLE_CLIENT_ID!,
-  clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-  redirectUris: [process.env.GOOGLE_REDIRECT_URI!],
-});
-
 export const handler = async (
   event: APIGatewayEvent
 ): Promise<APIGatewayProxyResult> => {
   console.log(event);
 
-  const { code, scope } = event.queryStringParameters!;
-  const resultCode = `${code}&scope=${scope?.split(" ").join("+")}`;
+  const { requestContext } = event;
+  const { domainName } = requestContext;
 
-  console.log("Result code:", resultCode)
+  const authService = createAuthService({
+    clientId: process.env.GOOGLE_CLIENT_ID!,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    redirectUris: [`https://${domainName}/prod/auth/redirect`],
+  });
+
+  const { code } = event.queryStringParameters!;
 
   try {
-    const { tokens } = await authService.getToken(resultCode);
+    const { tokens } = await authService.getToken(code!);
 
     return {
       statusCode: 301,
