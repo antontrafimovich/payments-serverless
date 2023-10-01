@@ -21,8 +21,7 @@ export class AuthServiceStack extends cdk.Stack {
       runtime: Runtime.NODEJS_18_X,
       environment: {
         GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID as string,
-        GOOGLE_CLIENT_SECRET: process.env.NOTION_KEY as string,
-        GOOGLE_REDIRECT_URI: process.env.GOOGLE_REDIRECT_URI as string,
+        GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET as string,
       },
     });
 
@@ -32,8 +31,8 @@ export class AuthServiceStack extends cdk.Stack {
       runtime: Runtime.NODEJS_18_X,
       environment: {
         GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID as string,
-        GOOGLE_CLIENT_SECRET: process.env.NOTION_KEY as string,
-        GOOGLE_REDIRECT_URI: process.env.GOOGLE_REDIRECT_URI as string,
+        GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET as string,
+        FRONTEND_REDIRECT_URI: process.env.FRONTEND_REDIRECT_URI as string,
       },
     });
 
