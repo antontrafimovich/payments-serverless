@@ -18,7 +18,7 @@ export const handler = async (
   const authService = createAuthService({
     clientId: process.env.GOOGLE_CLIENT_ID!,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-    redirectUris: [`https://${domainName}/prod/auth/redirect`!],
+    redirectUris: [`https://${domainName}/prod/auth/redirect`],
   });
 
   let authUrl;
