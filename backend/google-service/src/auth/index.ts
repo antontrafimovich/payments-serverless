@@ -14,9 +14,6 @@ export const handler = async (
 
   const { redirectUri } = JSON.parse(event.body!);
 
-  const { requestContext } = event;
-  const { domainName } = requestContext;
-
   const authService = createAuthService({
     clientId: process.env.GOOGLE_CLIENT_ID!,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
