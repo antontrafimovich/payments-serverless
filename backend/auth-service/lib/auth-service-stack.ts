@@ -15,22 +15,29 @@ export class AuthServiceStack extends cdk.Stack {
       },
     });
 
-    console.log(gateway.url);
+    const googleAuthHandler = Function.fromFunctionArn(
+      this,
+      "GoogleAuthHandler",
+      process.env.GOOGLE_AUTH_LAMBDA_ARN!
+    );
+
+    console.log(
+      "Google auth handler function name:",
+      googleAuthHandler.functionName
+    );
 
     const authHandler = new lambda.NodejsFunction(this, "AuthHandler", {
       entry: "src/auth/index.ts",
       handler: "handler",
       runtime: Runtime.NODEJS_18_X,
       environment: {
-        REDIRECT_TO: 'https://7nbmfhr8y9.execute-api.eu-central-1.amazonaws.com/prod/auth/redirect',
+        REDIRECT_TO: "http://localhost:5173/auth/redirect",
+        GOOGLE_AUTH_HANDLER_FUNCTION_NAME: googleAuthHandler.functionName,
+      },
+      bundling: {
+        externalModules: ["@aws-sdk/*", "aws-lambda"],
       },
     });
-
-    const googleAuthHandler = Function.fromFunctionArn(
-      this,
-      "GoogleAuthHandler",
-      process.env.GOOGLE_AUTH_LAMBDA_ARN!
-    );
     googleAuthHandler.grantInvoke(authHandler);
 
     const redirectHandler = new lambda.NodejsFunction(this, "RedirectHandler", {
