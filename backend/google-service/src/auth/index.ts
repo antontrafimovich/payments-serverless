@@ -1,5 +1,3 @@
-import { APIGatewayEvent, APIGatewayProxyResult } from "aws-lambda";
-
 import { createAuthService } from "../shared";
 import {
   GOOGLE_DRIVE_FILE_SCOPE,
@@ -7,12 +5,12 @@ import {
   GOOGLE_USERINFO_SCOPE,
 } from "./constants";
 
-export const handler = async (
-  event: APIGatewayEvent
-): Promise<APIGatewayProxyResult> => {
+export const handler = async (event: {
+  body: { redirectUri: string };
+}): Promise<string | Error> => {
   console.log(event);
 
-  const { redirectUri } = JSON.parse(event.body!);
+  const { redirectUri } = event.body;
 
   const authService = createAuthService({
     clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -20,39 +18,19 @@ export const handler = async (
     redirectUri,
   });
 
-  let authUrl;
-
   try {
-    authUrl = authService.generateAuthUrl([
+    const authUrl = authService.generateAuthUrl([
       GOOGLE_DRIVE_FILE_SCOPE,
       GOOGLE_SPREADSHEET_SCOPE,
       GOOGLE_USERINFO_SCOPE,
     ]);
 
-    console.log("Auth url:", authUrl);
+    console.log("Result authUrl:", authUrl);
 
-    return {
-      statusCode: 301,
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Headers": "*",
-        "Access-Control-Allow-Methods": "*",
-        Location: authUrl,
-      },
-      body: "",
-    };
+    return authUrl;
   } catch (err) {
     console.error("Error generating auth URL:", err);
 
-    return {
-      statusCode: 500,
-      headers: {
-        "Content-type": "text/plain",
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Headers": "*",
-        "Access-Control-Allow-Methods": "*",
-      },
-      body: `Error generating auth URL: ${err}`,
-    };
+    return new Error(`Error generating auth URL: ${err}`);
   }
 };
