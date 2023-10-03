@@ -1,39 +1,38 @@
 import { APIGatewayEvent, APIGatewayProxyResult } from "aws-lambda";
 
-import { createAuthService } from "../shared";
-import {
-  GOOGLE_DRIVE_FILE_SCOPE,
-  GOOGLE_SPREADSHEET_SCOPE,
-  GOOGLE_USERINFO_SCOPE,
-} from "./constant";
+import { AuthService, ThirdPartyAuthService } from "../shared";
+import { GoogleAuthService } from "./google";
 
-export const handler = async (
-  event: APIGatewayEvent
-): Promise<APIGatewayProxyResult> => {
-  console.log(event);
+const getAuthService = (type: "google" | "local"): AuthService => {
+  if (type === "google") {
+    return new GoogleAuthService();
+  }
 
-  const { requestContext } = event;
-  const { domainName } = requestContext;
+  return {} as any;
+};
 
-  const authService = createAuthService({
-    clientId: process.env.GOOGLE_CLIENT_ID!,
-    clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-    redirectUris: [`https://${domainName}/prod/auth/redirect`],
+const localAuthHandler = (authService: AuthService) => {
+  return Promise.resolve({
+    statusCode: 301,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Headers": "*",
+      "Access-Control-Allow-Methods": "*",
+    },
+    body: "",
   });
+};
 
-  let authUrl;
-
+const thirdPartyAuthHandler = async (
+  authService: ThirdPartyAuthService
+): Promise<APIGatewayProxyResult> => {
   try {
-    authUrl = authService.generateAuthUrl([
-      GOOGLE_DRIVE_FILE_SCOPE,
-      GOOGLE_SPREADSHEET_SCOPE,
-      GOOGLE_USERINFO_SCOPE,
-    ]);
+    const authUrl = await authService.generateUrl(process.env.REDIRECT_TO!);
 
     console.log("Auth url:", authUrl);
 
     return {
-      statusCode: 301,
+      statusCode: 302,
       headers: {
         "Access-Control-Allow-Origin": "*",
         "Access-Control-Allow-Headers": "*",
@@ -56,4 +55,30 @@ export const handler = async (
       body: `Error generating auth URL: ${err}`,
     };
   }
+};
+
+const isThirdPartyAuthService = (
+  authService: AuthService
+): authService is ThirdPartyAuthService => {
+  return authService.isThirdParty;
+};
+
+const handleAuth = (
+  authService: AuthService
+): Promise<APIGatewayProxyResult> => {
+  if (isThirdPartyAuthService(authService)) {
+    return thirdPartyAuthHandler(authService);
+  }
+
+  return localAuthHandler(authService);
+};
+
+export const handler = async (
+  event: APIGatewayEvent
+): Promise<APIGatewayProxyResult> => {
+  console.log(event);
+
+  const authService = getAuthService("google");
+
+  return handleAuth(authService);
 };
