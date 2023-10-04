@@ -9,7 +9,7 @@ export const Redirect = () => {
   }, [search]);
 
   const token = useMemo(() => {
-    return query.toString().split("code=")[1];
+    return query.toString().split("token=")[1];
   }, [query]);
 
   localStorage.setItem("token", token);
