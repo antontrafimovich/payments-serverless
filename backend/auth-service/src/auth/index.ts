@@ -1,7 +1,10 @@
 import { APIGatewayEvent, APIGatewayProxyResult } from "aws-lambda";
 
-import { AuthService, ThirdPartyAuthService } from "../shared";
-import { GoogleAuthService } from "./google";
+import {
+  AuthService,
+  GoogleAuthService,
+  ThirdPartyAuthService,
+} from "../shared";
 
 const getAuthService = (type: "google" | "local"): AuthService => {
   if (type === "google") {
