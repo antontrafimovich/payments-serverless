@@ -1,9 +1,9 @@
-import { createAuthService } from "../shared";
 import {
+  createAuthService,
   GOOGLE_DRIVE_FILE_SCOPE,
   GOOGLE_SPREADSHEET_SCOPE,
   GOOGLE_USERINFO_SCOPE,
-} from "./constants";
+} from "../shared";
 
 export const handler = async (event: {
   body: { redirectUri: string };
