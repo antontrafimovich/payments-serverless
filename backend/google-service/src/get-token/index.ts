@@ -1,12 +1,7 @@
-import {
-  createAuthService,
-  GOOGLE_DRIVE_FILE_SCOPE,
-  GOOGLE_SPREADSHEET_SCOPE,
-  GOOGLE_USERINFO_SCOPE,
-} from "../shared";
+import { createAuthService } from "../shared";
 
 export const handler = async (event: {
-  body: { redirectUri: string };
+  body: { redirectUri: string; code: string };
 }): Promise<string | Error> => {
   console.log(event);
 
@@ -15,17 +10,15 @@ export const handler = async (event: {
   const authService = createAuthService({
     clientId: process.env.GOOGLE_CLIENT_ID!,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-    redirectUri,
+    redirectUri: `https://${redirectUri}`,
   });
 
-  const decodedCode = decodeURIComponent(code);
-
   try {
-    const { tokens } = await authService.getToken(decodedCode);
+    const { tokens } = await authService.getToken(code);
 
     console.log("Result tokens:", tokens);
 
-    return tokens;
+    return btoa(JSON.stringify(tokens));
   } catch (err) {
     console.error("Google Service: error in getting token from code:", err);
 
