@@ -1,44 +1,50 @@
 import { APIGatewayEvent, APIGatewayProxyResult } from "aws-lambda";
 
-import { createAuthService } from "../shared";
+import { GoogleAuthService, ThirdPartyAuthService } from "../shared";
+
+const getAuthService = (type: "google"): ThirdPartyAuthService => {
+  if (type === "google") {
+    return new GoogleAuthService();
+  }
+
+  return {} as any;
+};
 
 export const handler = async (
   event: APIGatewayEvent
 ): Promise<APIGatewayProxyResult> => {
   console.log(event);
 
-  const { requestContext } = event;
-  const { domainName } = requestContext;
-
-  const authService = createAuthService({
-    clientId: process.env.GOOGLE_CLIENT_ID!,
-    clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-    redirectUris: [`https://${domainName}/prod/auth/redirect`],
-  });
-
   const { code } = event.queryStringParameters!;
+  const context = event.requestContext;
+  const redirectUri = `${context.domainName}/prod/auth/redirect`;
+
+  const authService = getAuthService("google");
 
   try {
-    const { tokens } = await authService.getToken(code!);
+    const token = await authService.getToken(code!, redirectUri);
 
     return {
-      statusCode: 301,
+      statusCode: 302,
       headers: {
-        Location: `${process.env.FRONTEND_REDIRECT_URI}?code=${btoa(
-          JSON.stringify(tokens)
-        )}`,
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Headers": "*",
+        "Access-Control-Allow-Methods": "*",
+        Location: `${process.env.FRONTEND_REDIRECT_URI}?token=${token}`,
       },
       body: "",
     };
   } catch (err) {
-    console.error("Google code parsing error:", err);
+    console.error("AuthService: error in parsing code to token:", err);
 
     return {
       statusCode: 500,
       headers: {
-        "Content-Type": "text/plain",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Headers": "*",
+        "Access-Control-Allow-Methods": "*",
       },
-      body: `Google code parsing error: ${err}`,
+      body: `AuthService: error in parsing code to token: ${err}`,
     };
   }
 };
