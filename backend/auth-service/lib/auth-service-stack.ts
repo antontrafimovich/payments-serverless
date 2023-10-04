@@ -21,17 +21,13 @@ export class AuthServiceStack extends cdk.Stack {
       process.env.GOOGLE_AUTH_LAMBDA_ARN!
     );
 
-    console.log(
-      "Google auth handler function name:",
-      googleAuthHandler.functionName
-    );
-
     const authHandler = new lambda.NodejsFunction(this, "AuthHandler", {
       entry: "src/auth/index.ts",
       handler: "handler",
       runtime: Runtime.NODEJS_18_X,
       environment: {
-        REDIRECT_TO: "http://localhost:5173/auth/redirect",
+        REGION: process.env.REGION!,
+        REDIRECT_TO: "https://7nbmfhr8y9.execute-api.eu-central-1.amazonaws.com/prod/auth/redirect",
         GOOGLE_AUTH_HANDLER_FUNCTION_NAME: googleAuthHandler.functionName,
       },
       bundling: {
@@ -40,17 +36,23 @@ export class AuthServiceStack extends cdk.Stack {
     });
     googleAuthHandler.grantInvoke(authHandler);
 
+    const googleGetTokenHandler = Function.fromFunctionArn(
+      this,
+      "GoogleGetTokenHandler",
+      process.env.GOOGLE_GET_TOKEN_LAMBDA_ARN!
+    );
+
     const redirectHandler = new lambda.NodejsFunction(this, "RedirectHandler", {
       entry: "src/redirect/index.ts",
       handler: "handler",
       runtime: Runtime.NODEJS_18_X,
       environment: {
-        GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID as string,
-        GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET as string,
+        REGION: process.env.REGION!,
         FRONTEND_REDIRECT_URI: process.env.FRONTEND_REDIRECT_URI as string,
-        GOOGLE_AUTH_HANDLER_FUNCTION_NAME: googleAuthHandler.functionName,
+        GOOGLE_GET_TOKEN_FUNCTION_NAME: googleGetTokenHandler.functionName,
       },
     });
+    googleGetTokenHandler.grantInvoke(redirectHandler);
 
     const authIntegration = new gw.LambdaIntegration(authHandler);
     const authResource = gateway.root.addResource("auth");
