@@ -1,6 +1,6 @@
 import * as cdk from "aws-cdk-lib";
 import * as gw from "aws-cdk-lib/aws-apigateway";
-import { Runtime } from "aws-cdk-lib/aws-lambda";
+import { Runtime, Function } from "aws-cdk-lib/aws-lambda";
 import * as lambda from "aws-cdk-lib/aws-lambda-nodejs";
 import { Construct } from "constructs";
 
@@ -17,15 +17,23 @@ export class UserServiceStack extends cdk.Stack {
       },
     });
 
+    const googleGetUserHandler = Function.fromFunctionArn(
+      this,
+      "GoogleGetUserHandler",
+      process.env.GOOGLE_GET_USER_HANDLER_FUNCTION_ARN!
+    );
+
     const getUserHandler = new lambda.NodejsFunction(this, "GetUserHandler", {
       entry: "src/get-user/index.ts",
       handler: "handler",
       runtime: Runtime.NODEJS_18_X,
       environment: {
-        GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID as string,
-        GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET as string,
+        GOOGLE_GET_USER_HANDLER_FUNCTION_NAME:
+          googleGetUserHandler.functionName,
       },
     });
+    googleGetUserHandler.grantInvoke(getUserHandler);
+
     const getUserIntegration = new gw.LambdaIntegration(getUserHandler);
     const userResource = gateway.root.addResource("user");
     userResource.addMethod("GET", getUserIntegration);
