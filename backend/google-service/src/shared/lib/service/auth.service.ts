@@ -22,5 +22,15 @@ export const createAuthService = (credentials: {
     getToken: (code: string) => {
       return oAuth2Client.getToken(code);
     },
+
+    setToken: (token: string) => {
+      oAuth2Client.setCredentials(JSON.parse(atob(token)));
+    },
+
+    getUserInfo: () => {
+      const oath2 = google.oauth2({ version: "v2", auth: oAuth2Client });
+
+      return oath2.userinfo.get();
+    },
   };
 };
