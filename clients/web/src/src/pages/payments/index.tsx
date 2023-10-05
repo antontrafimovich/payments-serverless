@@ -77,7 +77,7 @@ export const Payments = ({ report }: ExpensesProps) => {
   }, [report]);
 
   useEffect(() => {
-    fetch("http://localhost:3000/user-info", {
+    fetch("https://hmgnhh3uy2.execute-api.eu-central-1.amazonaws.com/prod/user", {
       headers: {
         authorization: `Bearer ${token}`,
       },
