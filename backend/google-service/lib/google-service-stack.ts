@@ -28,5 +28,15 @@ export class GoogleServiceStack extends cdk.Stack {
         GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET as string,
       },
     });
+
+    new lambda.NodejsFunction(this, "AtPaymentsApiGoogleGetUserInfoHandler", {
+      entry: "src/get-user/index.ts",
+      handler: "handler",
+      runtime: Runtime.NODEJS_18_X,
+      environment: {
+        GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID as string,
+        GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET as string,
+      },
+    });
   }
 }
