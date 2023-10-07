@@ -76,12 +76,24 @@ const handleAuth = (
   return localAuthHandler(authService);
 };
 
+const getBody = (event: APIGatewayEvent) => {};
+
+const DEFAULT_AUTH_TYPE = "google";
+
+type AuthType = "google" | "local";
+
 export const handler = async (
   event: APIGatewayEvent
 ): Promise<APIGatewayProxyResult> => {
   console.log(event);
 
-  const authService = getAuthService("google");
+  let type: AuthType = DEFAULT_AUTH_TYPE;
+
+  if (event.body) {
+    type = JSON.parse(event.body).type;
+  }
+
+  const authService = getAuthService(type);
 
   return handleAuth(authService);
 };
