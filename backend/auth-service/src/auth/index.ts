@@ -76,8 +76,6 @@ const handleAuth = (
   return localAuthHandler(authService);
 };
 
-const getBody = (event: APIGatewayEvent) => {};
-
 const DEFAULT_AUTH_TYPE = "google";
 
 type AuthType = "google" | "local";
