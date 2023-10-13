@@ -1,4 +1,4 @@
-import { createAuthService } from "../shared";
+import { createGoogleService } from "../shared";
 
 export const handler = async (event: {
   body: { token: string; redirectUri: string };
@@ -7,7 +7,7 @@ export const handler = async (event: {
 
   const { token, redirectUri } = event.body;
 
-  const authService = createAuthService({
+  const authService = createGoogleService({
     clientId: process.env.GOOGLE_CLIENT_ID!,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     redirectUri,
