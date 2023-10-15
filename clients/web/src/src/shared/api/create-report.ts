@@ -8,5 +8,8 @@ export const createReport = (file: File, bank: string) => {
   return fetch(apiPaths.report + "/report", {
     method: "POST",
     body: formData,
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
   });
 };
