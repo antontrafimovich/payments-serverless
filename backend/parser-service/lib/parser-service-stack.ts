@@ -2,7 +2,7 @@ import "dotenv/config";
 
 import * as cdk from "aws-cdk-lib";
 import * as gw from "aws-cdk-lib/aws-apigateway";
-import { Runtime } from "aws-cdk-lib/aws-lambda";
+import { Runtime, Function } from "aws-cdk-lib/aws-lambda";
 import * as lambda from "aws-cdk-lib/aws-lambda-nodejs";
 import { Construct } from "constructs";
 
@@ -12,6 +12,12 @@ export class ParserServiceStack extends cdk.Stack {
 
     // The code that defines your stack goes here
 
+    const googleCreateSheetHandler = Function.fromFunctionArn(
+      this,
+      "GoogleCreateSheetHandler",
+      process.env.GOOGLE_CREATE_SHEET_FUNCTION_ARN!
+    );
+
     const parseHandler = new lambda.NodejsFunction(this, "ParseHandler", {
       entry: "src/index.ts",
       handler: "handler",
@@ -20,8 +26,11 @@ export class ParserServiceStack extends cdk.Stack {
         NOTION_DATABASE: process.env.NOTION_DATABASE as string,
         NOTION_KEY: process.env.NOTION_KEY as string,
         PHONE_NUMBER: process.env.PHONE_NUMBER as string,
+        GOOGLE_CREATE_SHEET_FUNCTION_NAME:
+          googleCreateSheetHandler.functionName,
       },
     });
+    googleCreateSheetHandler.grantInvoke(parseHandler);
 
     const gateway = new gw.RestApi(this, "AtPaymentsApi", {
       defaultCorsPreflightOptions: {
@@ -29,7 +38,7 @@ export class ParserServiceStack extends cdk.Stack {
         allowMethods: gw.Cors.ALL_METHODS,
       },
     });
-    
+
     const parseHandlerIntegration = new gw.LambdaIntegration(parseHandler);
     gateway.root
       .addResource("report")
