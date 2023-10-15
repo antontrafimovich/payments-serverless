@@ -1,5 +1,5 @@
 import {
-  createAuthService,
+  createGoogleService,
   GOOGLE_DRIVE_FILE_SCOPE,
   GOOGLE_SPREADSHEET_SCOPE,
   GOOGLE_USERINFO_SCOPE,
@@ -12,14 +12,14 @@ export const handler = async (event: {
 
   const { redirectUri } = event.body;
 
-  const authService = createAuthService({
+  const googleService = createGoogleService({
     clientId: process.env.GOOGLE_CLIENT_ID!,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     redirectUri,
   });
 
   try {
-    const authUrl = authService.generateAuthUrl([
+    const authUrl = googleService.generateAuthUrl([
       GOOGLE_DRIVE_FILE_SCOPE,
       GOOGLE_SPREADSHEET_SCOPE,
       GOOGLE_USERINFO_SCOPE,

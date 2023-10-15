@@ -1,4 +1,4 @@
-import { createAuthService } from "../shared";
+import { createGoogleService } from "../shared";
 
 export const handler = async (event: {
   body: { redirectUri: string; code: string };
@@ -7,14 +7,14 @@ export const handler = async (event: {
 
   const { code, redirectUri } = event.body;
 
-  const authService = createAuthService({
+  const googleService = createGoogleService({
     clientId: process.env.GOOGLE_CLIENT_ID!,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     redirectUri: `https://${redirectUri}`,
   });
 
   try {
-    const { tokens } = await authService.getToken(code);
+    const { tokens } = await googleService.getToken(code);
 
     console.log("Result tokens:", tokens);
 
