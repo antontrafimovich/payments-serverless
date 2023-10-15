@@ -64,7 +64,7 @@ export const createGoogleService = (credentials: {
       return googleDriveFolderCreateResponse.data.id;
     },
 
-    createSheet: async (name: string, folder: string, content: string) => {
+    createSheet: async (name: string, content: string) => {
       if (await checkFileExists(name)) {
         throw new Error(
           `Google service error: file with name ${name} already exists`
@@ -77,7 +77,6 @@ export const createGoogleService = (credentials: {
         requestBody: {
           name,
           mimeType: "application/vnd.google-apps.spreadsheet",
-          parents: [folder],
         },
         media: {
           mimeType: "application/vnd.google-apps.spreadsheet",
