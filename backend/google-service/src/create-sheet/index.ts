@@ -17,5 +17,5 @@ export const handler = async (event: {
 
   service.setToken(decodedToken);
 
-  return service.createSheet(fileName, ".moneytrack", data);
+  return service.createSheet(fileName, data);
 };
