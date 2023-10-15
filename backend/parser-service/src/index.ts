@@ -14,6 +14,7 @@ import {
 } from "./shared";
 import { service } from "./shop";
 import { Shop } from "./shop/shop.model";
+import { createGoogleService } from "./shared/service/google.service";
 
 const mapDb = createClient(process.env.NOTION_KEY as string);
 const shops = service(mapDb);
@@ -30,6 +31,14 @@ export const handler = async (
   event: APIGatewayEvent
 ): Promise<APIGatewayProxyResult> => {
   const formData = event.body;
+
+  console.log(event);
+
+  const [, token] = event.headers["Authorization"]?.split("Bearer ")!;
+
+  if (!token) {
+    return stringToError("User is not authenticated", 401);
+  }
 
   if (formData === null) {
     return stringToError("File hasn't been provided.", 400);
@@ -87,6 +96,16 @@ export const handler = async (
   const paymentsData = parser(content.data);
 
   const resultData = merge(paymentsData, shopsMetadata);
+
+  const googleService = createGoogleService();
+
+  const sheet = googleService.createStorage(
+    ".moneytrack",
+    token,
+    "Id, Value, Date, Type, Counterparty"
+  );
+
+  console.log(sheet);
 
   return toResponse({
     statusCode: 200,
