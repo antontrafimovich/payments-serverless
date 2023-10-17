@@ -42,7 +42,7 @@ export const handler = async (
 
   const googleService = createGoogleService();
 
-  const sheet = googleService.createStorage(
+  const sheet = await googleService.createStorage(
     ".moneytrack",
     token,
     "Id, Value, Date, Type, Counterparty"
