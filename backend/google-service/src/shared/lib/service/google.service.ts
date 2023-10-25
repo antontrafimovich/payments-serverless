@@ -1,23 +1,29 @@
-import { google } from "googleapis";
+import { OAuth2Client } from "google-auth-library/build/src/auth/oauth2clief xtuj nen nt";
+import { drive as googleDrive } from "googleapis/build/src/apis/drive";
+import { oauth2 } from "googleapis/build/src/apis/oauth2";
+import { sheets as googleSheets } from "googleapis/build/src/apis/sheets";
 
 export const createGoogleService = (credentials: {
   clientId: string;
   clientSecret: string;
   redirectUri: string;
 }) => {
-  const oAuth2Client = new google.auth.OAuth2(
+  const oAuth2Client = new OAuth2Client(
     credentials.clientId,
     credentials.clientSecret,
     credentials.redirectUri
   );
 
   const checkFileExists = async (fileName: string) => {
-    const drive = google.drive({ version: "v3", auth: oAuth2Client });
+    const drive = googleDrive({ version: "v3", auth: oAuth2Client });
 
     try {
       const response = await drive.files.list({
         q: `name='${fileName}'`,
       });
+
+      console.log("Files:", response.data.files);
+
       return response.data.files ? response.data.files.length > 0 : false;
     } catch (error) {
       console.error("Error checking if the file exists:", error);
@@ -42,13 +48,13 @@ export const createGoogleService = (credentials: {
     },
 
     getUserInfo: () => {
-      const oath2 = google.oauth2({ version: "v2", auth: oAuth2Client });
+      const oath2 = oauth2({ version: "v2", auth: oAuth2Client });
 
       return oath2.userinfo.get();
     },
 
     createFolder: async (name: string) => {
-      const drive = google.drive({ version: "v3", auth: oAuth2Client });
+      const drive = googleDrive({ version: "v3", auth: oAuth2Client });
 
       const folderMeta = {
         name,
@@ -64,23 +70,19 @@ export const createGoogleService = (credentials: {
       return googleDriveFolderCreateResponse.data.id;
     },
 
-    createSheet: async (name: string, content: string) => {
+    createSheet: async (name: string) => {
       if (await checkFileExists(name)) {
         throw new Error(
           `Google service error: file with name ${name} already exists`
         );
       }
 
-      const drive = google.drive({ version: "v3", auth: oAuth2Client });
+      const drive = googleDrive({ version: "v3", auth: oAuth2Client });
 
       const googleSheetCreateRepsponse = await drive.files.create({
         requestBody: {
           name,
           mimeType: "application/vnd.google-apps.spreadsheet",
-        },
-        media: {
-          mimeType: "application/vnd.google-apps.spreadsheet",
-          body: content,
         },
       });
 
@@ -88,7 +90,7 @@ export const createGoogleService = (credentials: {
     },
 
     addDataToSheet: async (sheetId: string, data: string[][]) => {
-      const sheets = google.sheets({ version: "v4", auth: oAuth2Client });
+      const sheets = googleSheets({ version: "v4", auth: oAuth2Client });
 
       try {
         const spreadsheet = await sheets.spreadsheets.values.append({
@@ -110,7 +112,7 @@ export const createGoogleService = (credentials: {
     },
 
     getDataFromSheet: async (sheetId: string) => {
-      const sheets = google.sheets({ version: "v4", auth: oAuth2Client });
+      const sheets = googleSheets({ version: "v4", auth: oAuth2Client });
 
       try {
         const spreadsheet = await sheets.spreadsheets.getByDataFilter({
