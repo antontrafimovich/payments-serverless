@@ -64,7 +64,6 @@ export class MapServiceStack extends cdk.Stack {
     const getMapTypesIntegration = new gw.LambdaIntegration(getMapTypesHandler);
 
     const mapResource = gateway.root.addResource("map");
-
     const recordResource = mapResource.addResource("record");
     const typesResource = mapResource.addResource("types");
 
