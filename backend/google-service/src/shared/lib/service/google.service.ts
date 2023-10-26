@@ -1,4 +1,4 @@
-import { OAuth2Client } from "google-auth-library/build/src/auth/oauth2clief xtuj nen nt";
+import { OAuth2Client } from "google-auth-library/build/src/auth/oauth2client";
 import { drive as googleDrive } from "googleapis/build/src/apis/drive";
 import { oauth2 } from "googleapis/build/src/apis/oauth2";
 import { sheets as googleSheets } from "googleapis/build/src/apis/sheets";
@@ -28,6 +28,27 @@ export const createGoogleService = (credentials: {
     } catch (error) {
       console.error("Error checking if the file exists:", error);
       return false;
+    }
+  };
+
+  const addDataToSheet = async (sheetId: string, values: string[][]) => {
+    const sheets = googleSheets({ version: "v4", auth: oAuth2Client });
+
+    try {
+      const spreadsheet = await sheets.spreadsheets.values.append({
+        spreadsheetId: sheetId,
+        range: "A1:A5",
+        valueInputOption: "RAW",
+        requestBody: {
+          values,
+        },
+      });
+
+      return spreadsheet.data.spreadsheetId;
+      // console.log(`Spreadsheet ID: ${spreadsheet.data.spreadsheetId}`);
+    } catch (err) {
+      // TODO (developer) - Handle exception
+      throw err;
     }
   };
 
@@ -70,7 +91,7 @@ export const createGoogleService = (credentials: {
       return googleDriveFolderCreateResponse.data.id;
     },
 
-    createSheet: async (name: string) => {
+    createSheet: async (name: string, data: string[][]) => {
       if (await checkFileExists(name)) {
         throw new Error(
           `Google service error: file with name ${name} already exists`
@@ -86,30 +107,15 @@ export const createGoogleService = (credentials: {
         },
       });
 
+      const result = await addDataToSheet(
+        googleSheetCreateRepsponse.data.id as string,
+        data
+      );
+
       return googleSheetCreateRepsponse.data.id;
     },
 
-    addDataToSheet: async (sheetId: string, data: string[][]) => {
-      const sheets = googleSheets({ version: "v4", auth: oAuth2Client });
-
-      try {
-        const spreadsheet = await sheets.spreadsheets.values.append({
-          spreadsheetId: sheetId,
-          range: "Sheet1",
-          valueInputOption: "RAW",
-          insertDataOption: "INSERT_ROWS",
-          requestBody: {
-            values: data,
-          },
-        });
-
-        return spreadsheet.data.spreadsheetId;
-        // console.log(`Spreadsheet ID: ${spreadsheet.data.spreadsheetId}`);
-      } catch (err) {
-        // TODO (developer) - Handle exception
-        throw err;
-      }
-    },
+    addDataToSheet,
 
     getDataFromSheet: async (sheetId: string) => {
       const sheets = googleSheets({ version: "v4", auth: oAuth2Client });

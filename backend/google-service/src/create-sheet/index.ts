@@ -1,11 +1,11 @@
 import { createGoogleService } from "../shared";
 
 export const handler = async (event: {
-  body: { fileName: string; token: string; redirectUri: string; data: string };
+  body: { fileName: string; token: string; redirectUri: string; data: string[][] };
 }): Promise<string | null | undefined | Error> => {
   console.log(event);
 
-  const { token, fileName, redirectUri } = event.body;
+  const { token, fileName, redirectUri, data } = event.body;
 
   const service = createGoogleService({
     clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -17,5 +17,5 @@ export const handler = async (event: {
 
   service.setToken(decodedToken);
 
-  return service.createSheet(fileName);
+  return service.createSheet(fileName, data);
 };
