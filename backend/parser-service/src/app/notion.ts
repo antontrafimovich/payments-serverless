@@ -1,4 +1,4 @@
-import { Client } from "@notionhq/client";
+import Client from "@notionhq/client/build/src/Client";
 
 export const createClient = (key: string) => {
   const client = new Client({
