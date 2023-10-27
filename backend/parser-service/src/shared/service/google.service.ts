@@ -7,12 +7,15 @@ export const createGoogleService = () => {
     createStorage: async (
       name: string,
       token: string,
-      data: string
+      data: string[][],
+      redirectUri: string
     ): Promise<string> => {
       const command = new InvokeCommand({
         FunctionName: process.env.GOOGLE_CREATE_SHEET_FUNCTION_NAME as string,
         InvocationType: "RequestResponse",
-        Payload: JSON.stringify({ body: { fileName: name, token, data } }),
+        Payload: JSON.stringify({
+          body: { redirectUri, fileName: name, token, data },
+        }),
       });
 
       let response;
