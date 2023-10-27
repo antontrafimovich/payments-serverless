@@ -40,16 +40,6 @@ export const handler = async (
     return stringToError("User is not authenticated", 401);
   }
 
-  const googleService = createGoogleService();
-
-  const sheet = await googleService.createStorage(
-    ".moneytrack",
-    token,
-    "Id, Value, Date, Type, Counterparty"
-  );
-
-  console.log(sheet);
-
   if (formData === null) {
     return stringToError("File hasn't been provided.", 400);
   }
@@ -106,6 +96,20 @@ export const handler = async (
   const paymentsData = parser(content.data);
 
   const resultData = merge(paymentsData, shopsMetadata);
+
+  const googleService = createGoogleService();
+
+  const sheet = await googleService.createStorage(
+    ".moneytrack",
+    token,
+    [
+      ["Id", "Value", "Date", "Type", "Counterparty"],
+      ...(resultData as string[][]),
+    ],
+    process.env.GOOGLE_REDIRECT_URI!
+  );
+
+  console.log(sheet);
 
   return toResponse({
     statusCode: 200,
