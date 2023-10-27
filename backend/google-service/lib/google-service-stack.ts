@@ -42,6 +42,17 @@ export class GoogleServiceStack extends cdk.Stack {
     new lambda.NodejsFunction(this, "AtPaymentsApiGoogleCreateSheetHandler", {
       entry: "src/create-sheet/index.ts",
       handler: "handler",
+      timeout: cdk.Duration.seconds(6),
+      runtime: Runtime.NODEJS_18_X,
+      environment: {
+        GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID as string,
+        GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET as string,
+      },
+    });
+
+    new lambda.NodejsFunction(this, "AtPaymentsApiGoogleUpdateSheetHandler", {
+      entry: "src/update-sheet/index.ts",
+      handler: "handler",
       runtime: Runtime.NODEJS_18_X,
       environment: {
         GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID as string,
