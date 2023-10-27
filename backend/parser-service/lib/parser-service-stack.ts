@@ -22,12 +22,14 @@ export class ParserServiceStack extends cdk.Stack {
       entry: "src/index.ts",
       handler: "handler",
       runtime: Runtime.NODEJS_18_X,
+      timeout: cdk.Duration.seconds(9),
       environment: {
         NOTION_DATABASE: process.env.NOTION_DATABASE as string,
         NOTION_KEY: process.env.NOTION_KEY as string,
         PHONE_NUMBER: process.env.PHONE_NUMBER as string,
         GOOGLE_CREATE_SHEET_FUNCTION_NAME:
           googleCreateSheetHandler.functionName,
+        GOOGLE_REDIRECT_URI: process.env.GOOGLE_REDIRECT_URI as string,
       },
     });
     googleCreateSheetHandler.grantInvoke(parseHandler);
