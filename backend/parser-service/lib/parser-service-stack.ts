@@ -19,7 +19,7 @@ export class ParserServiceStack extends cdk.Stack {
     );
 
     const parseHandler = new lambda.NodejsFunction(this, "ParseHandler", {
-      entry: "src/index.ts",
+      entry: "src/create/index.ts",
       handler: "handler",
       runtime: Runtime.NODEJS_18_X,
       timeout: cdk.Duration.seconds(9),
@@ -34,6 +34,31 @@ export class ParserServiceStack extends cdk.Stack {
     });
     googleCreateSheetHandler.grantInvoke(parseHandler);
 
+    const googleGetFileListHandler = Function.fromFunctionArn(
+      this,
+      "GoogleGetFileListHandler",
+      process.env.GOOGLE_GET_FILE_LIST_FUNCTION_ARN!
+    );
+    const getReportsHandler = new lambda.NodejsFunction(
+      this,
+      "GetReportsHandler",
+      {
+        entry: "src/get/index.ts",
+        handler: "handler",
+        runtime: Runtime.NODEJS_18_X,
+        // timeout: cdk.Duration.seconds(9),
+        environment: {
+          // NOTION_DATABASE: process.env.NOTION_DATABASE as string,
+          // NOTION_KEY: process.env.NOTION_KEY as string,
+          // PHONE_NUMBER: process.env.PHONE_NUMBER as string,
+          GOOGLE_CREATE_SHEET_FUNCTION_NAME:
+            googleGetFileListHandler.functionName,
+          GOOGLE_REDIRECT_URI: process.env.GOOGLE_REDIRECT_URI as string,
+        },
+      }
+    );
+    googleGetFileListHandler.grantInvoke(getReportsHandler);
+
     const gateway = new gw.RestApi(this, "AtPaymentsApi", {
       defaultCorsPreflightOptions: {
         allowOrigins: gw.Cors.ALL_ORIGINS,
@@ -41,9 +66,12 @@ export class ParserServiceStack extends cdk.Stack {
       },
     });
 
+    const reportResource = gateway.root.addResource("report");
+
     const parseHandlerIntegration = new gw.LambdaIntegration(parseHandler);
-    gateway.root
-      .addResource("report")
-      .addMethod("POST", parseHandlerIntegration);
+    reportResource.addMethod("POST", parseHandlerIntegration);
+
+    const getReportsHandlerIntegration = new gw.LambdaIntegration(getReportsHandler);
+    reportResource.addMethod("GET", getReportsHandlerIntegration);
   }
 }
