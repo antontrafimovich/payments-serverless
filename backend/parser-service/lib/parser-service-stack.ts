@@ -51,7 +51,7 @@ export class ParserServiceStack extends cdk.Stack {
           // NOTION_DATABASE: process.env.NOTION_DATABASE as string,
           // NOTION_KEY: process.env.NOTION_KEY as string,
           // PHONE_NUMBER: process.env.PHONE_NUMBER as string,
-          GOOGLE_CREATE_SHEET_FUNCTION_NAME:
+          GOOGLE_GET_FILE_LIST_FUNCTION_NAME:
             googleGetFileListHandler.functionName,
           GOOGLE_REDIRECT_URI: process.env.GOOGLE_REDIRECT_URI as string,
         },
