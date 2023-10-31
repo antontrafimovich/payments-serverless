@@ -117,6 +117,23 @@ export const createGoogleService = (credentials: {
 
     addDataToSheet,
 
+    getFileListByName: async (name: string) => {
+      const drive = googleDrive({ version: "v3", auth: oAuth2Client });
+
+      try {
+        const response = await drive.files.list({
+          q: `name='${name}'`,
+        });
+
+        console.log("Files:", response.data.files);
+
+        return response.data.files;
+      } catch (error) {
+        console.error("Error checking if the file exists:", error);
+        throw error;
+      }
+    },
+
     getDataFromSheet: async (sheetId: string) => {
       const sheets = googleSheets({ version: "v4", auth: oAuth2Client });
 
