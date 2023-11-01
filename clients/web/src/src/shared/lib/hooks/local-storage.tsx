@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
-export const useLocalStorage = (map: (storage: Storage) => unknown) => {
-  const [value, setValue] = useState<unknown>(null);
+export const useLocalStorage = (key: string) => {
+  const [value, setValue] = useState<unknown>(localStorage.getItem(key));
 
   useEffect(() => {
     window.addEventListener(
@@ -9,7 +9,7 @@ export const useLocalStorage = (map: (storage: Storage) => unknown) => {
       function (event) {
         if (event.storageArea === localStorage) {
           setValue((prev: unknown) => {
-            const maybeNewValue = map(localStorage);
+            const maybeNewValue = localStorage.getItem(key);
 
             return maybeNewValue === prev ? prev : maybeNewValue;
           });
@@ -19,5 +19,12 @@ export const useLocalStorage = (map: (storage: Storage) => unknown) => {
     );
   }, [setValue]);
 
-  return value;
+  const set = useCallback(
+    (v: unknown) => {
+      localStorage.setItem(key, String(v));
+    },
+    [key]
+  );
+
+  return [value, set];
 };
