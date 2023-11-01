@@ -6,18 +6,12 @@ import { createGoogleService } from "../shared/service/google.service";
 export const handler = async (
   event: APIGatewayEvent
 ): Promise<APIGatewayProxyResult> => {
-  const formData = event.body;
-
   console.log(event);
 
   const [, token] = event.headers["Authorization"]?.split("Bearer ")!;
 
   if (!token) {
     return stringToError("User is not authenticated", 401);
-  }
-
-  if (formData === null) {
-    return stringToError("File hasn't been provided.", 400);
   }
 
   const googleService = createGoogleService();
