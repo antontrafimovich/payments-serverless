@@ -1,17 +1,17 @@
-import { useContext } from "react";
+import { useEffect } from "react";
+import { Navigate, useNavigate } from "react-router-dom";
 
-import { AppContext } from "../../app";
-import { Loader } from "../loader";
-import { Payments } from "../payments";
-import { ReportSelector } from "../selector/report-selector";
+import { useLocalStorage } from "../../shared/lib/hooks/local-storage";
 
 export const Main = () => {
-  const { report } = useContext(AppContext);
+  const [token] = useLocalStorage("token");
+  const navigate = useNavigate();
 
-  // if (report && report.data && !report.pending) {
-  //   return <Payments report={report.data} />;
-  // }
+  useEffect(() => {
+    if (!token) {
+      navigate("/auth");
+    }
+  }, [token]);
 
-  // return <Loader />;
-  return <ReportSelector />;
+  return <Navigate to={"/reports"} />;
 };
