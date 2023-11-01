@@ -1,0 +1,53 @@
+import { AppShell, Button, Group } from "@mantine/core";
+import { useLocalStorage } from "@mantine/hooks";
+import { useEffect, useState } from "react";
+import { popupCenter } from "../../shared";
+
+export const ReportSelector = () => {
+  const [token] = useLocalStorage({ key: "token" });
+
+  const [reportsData, setReportsData] =
+    useState<{ name: string; id: string }[]>();
+
+  useEffect(() => {
+    token &&
+      fetch(
+        "https://0vum1ao9sc.execute-api.eu-central-1.amazonaws.com/prod/report",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+        .then((data) => data.json())
+        .then(setReportsData);
+  }, [token]);
+
+  console.log(reportsData);
+
+  return (
+    <AppShell header={{ height: 60 }}>
+      <AppShell.Header>
+        <Group justify="flex-end" py={8} px={8}>
+          <Button
+            onClick={() =>
+              popupCenter({
+                url: "https://7nbmfhr8y9.execute-api.eu-central-1.amazonaws.com/prod/auth",
+                title: "Google Auth",
+                w: 520,
+                h: 570,
+              })
+            }
+          >
+            Login
+          </Button>
+        </Group>
+      </AppShell.Header>
+      <AppShell.Main>
+        {reportsData?.map((item) => (
+          <div key={item.id}>{item.name}</div>
+        ))}
+      </AppShell.Main>
+    </AppShell>
+  );
+};
