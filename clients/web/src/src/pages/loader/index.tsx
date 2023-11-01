@@ -7,15 +7,15 @@ import {
   Divider,
   FileInput,
   Group,
-  Header,
+  Stack,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
+import { useLocalStorage } from "@mantine/hooks";
 import { useContext, useEffect, useState } from "react";
 
 import { AppContext } from "../../app";
 import { BankSelector, ReadyReportLoader } from "../../features";
 import { Logo, popupCenter } from "../../shared";
-import { useLocalStorage } from "@mantine/hooks";
 
 export const Loader = () => {
   const { createReport, report, loadReport } = useContext(AppContext);
@@ -45,51 +45,49 @@ export const Loader = () => {
   }, [token]);
 
   return (
-    <AppShell
-      header={
-        <Header height={60} p="xs">
-          <Group align="center" spacing="sm" position="right">
-            <Button
-              onClick={() =>
-                popupCenter({
-                  url: "https://7nbmfhr8y9.execute-api.eu-central-1.amazonaws.com/prod/auth",
-                  title: "Google Auth",
-                  w: 520,
-                  h: 570,
-                })
-              }
-            >
-              Login
-            </Button>
-            <Button
-              onClick={() =>
-                fetch("http://localhost:3000/sheet", {
-                  method: "POST",
-                  headers: {
-                    authorization: `Bearer ${localStorage.getItem("token")!}`,
-                  },
-                })
-              }
-            >
-              Create Sheet
-            </Button>
-            {userInfo?.name || "Noname"}
-          </Group>
-        </Header>
-      }
-    >
-      <Center h="100%">
-        <Container size="30rem" px={0} my="auto">
-          <Center mb="md">
+    <AppShell header={{ height: 60 }}>
+      <AppShell.Header>
+        <Group h={"100%"} gap="sm" justify="flex-end">
+          <Button
+            onClick={() =>
+              popupCenter({
+                url: "https://7nbmfhr8y9.execute-api.eu-central-1.amazonaws.com/prod/auth",
+                title: "Google Auth",
+                w: 520,
+                h: 570,
+              })
+            }
+          >
+            Login
+          </Button>
+          <Button
+            onClick={() =>
+              fetch("http://localhost:3000/sheet", {
+                method: "POST",
+                headers: {
+                  authorization: `Bearer ${localStorage.getItem("token")!}`,
+                },
+              })
+            }
+          >
+            Create Sheet
+          </Button>
+          {userInfo?.name || "Noname"}
+        </Group>
+      </AppShell.Header>
+      <AppShell.Main py={"auto"}>
+        {/* <Center > */}
+        <Stack maw={320} mx={"auto"}>
+          <Container mb="md">
             <Logo style={{ width: "247.4px", height: "228.69px" }} />
-          </Center>
+          </Container>
           <form
             encType="multipart/form-data"
             onSubmit={form.onSubmit((values: any) => {
               createReport?.(values.report, values.bank);
             })}
           >
-            <Box maw={320} mx="auto">
+            <Box mx="auto">
               <BankSelector w="290px" {...form.getInputProps("bank")} />
               <FileInput
                 w="290px"
@@ -99,7 +97,7 @@ export const Loader = () => {
                 {...form.getInputProps("report")}
               />
 
-              <Group position="center" mt="xl">
+              <Center mt="xl">
                 <Button
                   type="submit"
                   onClick={() => form.values}
@@ -107,15 +105,16 @@ export const Loader = () => {
                 >
                   Send
                 </Button>
-              </Group>
+              </Center>
             </Box>
           </form>
           <Divider my="md" label="OR" labelPosition="center" />
-          <Group position="center">
+          <Center>
             <ReadyReportLoader reportLoaded={loadReport!} />
-          </Group>
-        </Container>
-      </Center>
+          </Center>
+        </Stack>
+        {/* </Center> */}
+      </AppShell.Main>
     </AppShell>
   );
 };

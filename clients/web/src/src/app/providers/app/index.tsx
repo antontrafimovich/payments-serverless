@@ -37,7 +37,9 @@ export const withAppProvider = (Component: () => ReactNode) => {
         value={{
           report: { pending, data },
           createReport: (report: File, bank: string) => {
-            post(report, bank).then((data) => setData(data));
+            post(report, bank)
+              .then((data) => setData(data))
+              .catch((err) => console.error(err));
           },
           loadReport: (file: File | null) => {
             if (!file) {

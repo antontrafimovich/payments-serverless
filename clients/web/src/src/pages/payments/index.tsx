@@ -3,8 +3,6 @@ import {
   Button,
   Container,
   Flex,
-  Header,
-  Navbar,
   Stack,
   Tooltip,
   UnstyledButton,
@@ -77,11 +75,14 @@ export const Payments = ({ report }: ExpensesProps) => {
   }, [report]);
 
   useEffect(() => {
-    fetch("https://hmgnhh3uy2.execute-api.eu-central-1.amazonaws.com/prod/user", {
-      headers: {
-        authorization: `Bearer ${token}`,
-      },
-    })
+    fetch(
+      "https://hmgnhh3uy2.execute-api.eu-central-1.amazonaws.com/prod/user",
+      {
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
+      }
+    )
       .then((data) => data.json())
       .then((data) => setUserInfo(data.data));
   }, [token]);
@@ -100,54 +101,50 @@ export const Payments = ({ report }: ExpensesProps) => {
   return (
     <AppShell
       padding="md"
-      navbar={
-        <Navbar width={{ base: 40 }} py="xs" px={8}>
-          <Navbar.Section>
-            <Stack>{actions}</Stack>
-          </Navbar.Section>
-        </Navbar>
-      }
-      header={
-        <Header height={60} p="xs">
-          <Flex justify="space-between" align="center">
-            <Logo
-              onClick={() => setReport!(null)}
-              type="horizontal"
-              style={{ width: "171.6px", height: "38.62px" }}
-            />
-            <Button
-              onClick={() =>
-                popupCenter({
-                  url: "https://7nbmfhr8y9.execute-api.eu-central-1.amazonaws.com/prod/auth",
-                  title: "Google Auth",
-                  w: 520,
-                  h: 570,
-                })
-              }
-            >
-              Login
-            </Button>
-            <Button
-              onClick={() =>
-                fetch("http://localhost:3000/sheet", {
-                  method: "POST",
-                  headers: {
-                    authorization: `Bearer ${localStorage.getItem("token")!}`,
-                  },
-                })
-              }
-            >
-              Create Sheet
-            </Button>
-            {userInfo?.name || "Noname"}
-            <Button ml="auto" onClick={onDownload}>
-              Download
-            </Button>
-          </Flex>
-        </Header>
-      }
+      header={{ height: 60 }}
+      navbar={{ width: 40, breakpoint: "xs" }}
     >
-      <Container ref={ref} fluid sx={{ height: "100%" }} px={0}>
+      <AppShell.Navbar>
+        <Stack>{actions}</Stack>
+      </AppShell.Navbar>
+      <AppShell.Header>
+        <Flex justify="space-between" align="center">
+          <Logo
+            onClick={() => setReport!(null)}
+            type="horizontal"
+            style={{ width: "171.6px", height: "38.62px" }}
+          />
+          <Button
+            onClick={() =>
+              popupCenter({
+                url: "https://7nbmfhr8y9.execute-api.eu-central-1.amazonaws.com/prod/auth",
+                title: "Google Auth",
+                w: 520,
+                h: 570,
+              })
+            }
+          >
+            Login
+          </Button>
+          <Button
+            onClick={() =>
+              fetch("http://localhost:3000/sheet", {
+                method: "POST",
+                headers: {
+                  authorization: `Bearer ${localStorage.getItem("token")!}`,
+                },
+              })
+            }
+          >
+            Create Sheet
+          </Button>
+          {userInfo?.name || "Noname"}
+          <Button ml="auto" onClick={onDownload}>
+            Download
+          </Button>
+        </Flex>
+      </AppShell.Header>
+      <Container ref={ref} fluid style={{ height: "100%" }} px={0}>
         <ReportTable mode={mode} report={report} height={rect.height} />
       </Container>
     </AppShell>
