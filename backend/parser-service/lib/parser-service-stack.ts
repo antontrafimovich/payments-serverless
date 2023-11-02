@@ -59,6 +59,31 @@ export class ParserServiceStack extends cdk.Stack {
     );
     googleGetFileListHandler.grantInvoke(getReportsHandler);
 
+    const googleGetFileContentHandler = Function.fromFunctionArn(
+      this,
+      "GoogleGetFileContentHandler",
+      process.env.GOOGLE_GET_FILE_CONTENT_FUNCTION_ARN!
+    );
+    const getReportHandler = new lambda.NodejsFunction(
+      this,
+      "GetReportHandler",
+      {
+        entry: "src/get-report-content/index.ts",
+        handler: "handler",
+        runtime: Runtime.NODEJS_18_X,
+        // timeout: cdk.Duration.seconds(9),
+        environment: {
+          // NOTION_DATABASE: process.env.NOTION_DATABASE as string,
+          // NOTION_KEY: process.env.NOTION_KEY as string,
+          // PHONE_NUMBER: process.env.PHONE_NUMBER as string,
+          GOOGLE_GET_FILE_CONTENT_FUNCTION_NAME:
+            googleGetFileContentHandler.functionName,
+          GOOGLE_REDIRECT_URI: process.env.GOOGLE_REDIRECT_URI as string,
+        },
+      }
+    );
+    googleGetFileContentHandler.grantInvoke(getReportHandler);
+
     const gateway = new gw.RestApi(this, "AtPaymentsApi", {
       defaultCorsPreflightOptions: {
         allowOrigins: gw.Cors.ALL_ORIGINS,
@@ -71,7 +96,15 @@ export class ParserServiceStack extends cdk.Stack {
     const parseHandlerIntegration = new gw.LambdaIntegration(parseHandler);
     reportResource.addMethod("POST", parseHandlerIntegration);
 
-    const getReportsHandlerIntegration = new gw.LambdaIntegration(getReportsHandler);
+    const getReportsHandlerIntegration = new gw.LambdaIntegration(
+      getReportsHandler
+    );
     reportResource.addMethod("GET", getReportsHandlerIntegration);
+
+    const reportIdResource = reportResource.addResource("{reportId}");
+    const getReportContentHandlerIntegration = new gw.LambdaIntegration(
+      getReportHandler
+    );
+    reportIdResource.addMethod("GET", getReportContentHandlerIntegration);
   }
 }

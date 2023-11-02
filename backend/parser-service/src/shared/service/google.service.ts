@@ -66,7 +66,43 @@ export const createGoogleService = () => {
 
         return JSON.parse(rawResponse);
       } catch (err) {
-        console.log("Decoding Google Lambda Create Sheet Response error:", err);
+        console.log("Decoding Google Lambda GetFileList response error:", err);
+        throw err;
+      }
+    },
+    getFileContentById: async (
+      fileId: string,
+      token: string,
+      redirectUri: string
+    ): Promise<string> => {
+      const command = new InvokeCommand({
+        FunctionName: process.env
+          .GOOGLE_GET_FILE_CONTENT_FUNCTION_NAME as string,
+        InvocationType: "RequestResponse",
+        Payload: JSON.stringify({
+          body: { redirectUri, fileId, token },
+        }),
+      });
+
+      let response;
+      try {
+        console.log("Command has been invoked");
+        response = await client.send(command);
+      } catch (err) {
+        console.error("Google Lambda Invokation error:", err);
+        throw err;
+      }
+
+      try {
+        console.log("Response has been received:", response);
+        const rawResponse = new TextDecoder("utf-8").decode(response.Payload);
+
+        return JSON.parse(rawResponse);
+      } catch (err) {
+        console.log(
+          "Decoding Google Lambda GetFileContent response error:",
+          err
+        );
         throw err;
       }
     },
