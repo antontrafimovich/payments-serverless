@@ -133,6 +133,24 @@ export const createGoogleService = (credentials: {
         throw error;
       }
     },
+    
+    getFileContentById: async (fileId: string) => {
+      const drive = googleDrive({ version: "v3", auth: oAuth2Client });
+
+      try {
+        const response = await drive.files.export({
+          fileId,
+          mimeType: "text/csv",
+        });
+
+        console.log("fileContent:", response);
+
+        return response;
+      } catch (error) {
+        console.error("Error checking if the file exists:", error);
+        throw error;
+      }
+    },
 
     getDataFromSheet: async (sheetId: string) => {
       const sheets = googleSheets({ version: "v4", auth: oAuth2Client });
