@@ -1,33 +1,23 @@
 import {
   AppShell,
-  Button,
   Container,
   Flex,
   Stack,
   Tooltip,
   UnstyledButton,
 } from "@mantine/core";
-import { useLocalStorage, useResizeObserver } from "@mantine/hooks";
-import {
-  ComponentProps,
-  FC,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import { useResizeObserver } from "@mantine/hooks";
+import { ComponentProps, FC, useEffect, useMemo, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 
-import { AppContext } from "../../app";
 import {
-  download,
   Logo,
   PivotTableIcon,
-  popupCenter,
   Report,
   TableIcon,
   withHover,
 } from "../../shared";
+import { useLocalStorage } from "../../shared/lib/hooks/local-storage";
 import { ReportTable } from "../../widgets";
 
 export type ExpensesProps = {
@@ -59,20 +49,39 @@ const actionDescriptors: {
   { icon: withHover(PivotTableIcon, "#333333"), label: "Pivot" },
 ];
 
-export const Payments = ({ report }: ExpensesProps) => {
+export const Payments = () => {
   const [ref, rect] = useResizeObserver();
-  const [token] = useLocalStorage({ key: "token" });
+  const [token] = useLocalStorage("token");
+  const { reportId } = useParams();
+  const navigate = useNavigate();
 
   const [userInfo, setUserInfo] = useState<any>(null);
 
-  const { setReport } = useContext(AppContext);
+  // const { setReport } = useContext(AppContext);
+
+  const [report, setReport] = useState<Report>();
 
   const [mode, setMode] = useState<"plain" | "pivot">("plain");
 
-  const onDownload = useCallback(() => {
-    const data = JSON.stringify(report);
-    download(data, "report.json");
-  }, [report]);
+  useEffect(() => {
+    if (reportId) {
+      fetch(
+        `https://0vum1ao9sc.execute-api.eu-central-1.amazonaws.com/prod/report/${reportId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      )
+        .then((data) => data.json())
+        .then(setReport);
+    }
+  }, [reportId]);
+
+  // const onDownload = useCallback(() => {
+  //   const data = JSON.stringify(report);
+  //   download(data, "report.json");
+  // }, [report]);
 
   useEffect(() => {
     fetch(
@@ -110,43 +119,23 @@ export const Payments = ({ report }: ExpensesProps) => {
       <AppShell.Header>
         <Flex justify="space-between" align="center">
           <Logo
-            onClick={() => setReport!(null)}
+            onClick={() => navigate("/reports")}
             type="horizontal"
             style={{ width: "171.6px", height: "38.62px" }}
           />
-          <Button
-            onClick={() =>
-              popupCenter({
-                url: "https://7nbmfhr8y9.execute-api.eu-central-1.amazonaws.com/prod/auth",
-                title: "Google Auth",
-                w: 520,
-                h: 570,
-              })
-            }
-          >
-            Login
-          </Button>
-          <Button
-            onClick={() =>
-              fetch("http://localhost:3000/sheet", {
-                method: "POST",
-                headers: {
-                  authorization: `Bearer ${localStorage.getItem("token")!}`,
-                },
-              })
-            }
-          >
-            Create Sheet
-          </Button>
           {userInfo?.name || "Noname"}
-          <Button ml="auto" onClick={onDownload}>
+          {/* <Button ml="auto" onClick={onDownload}>
             Download
-          </Button>
+          </Button> */}
         </Flex>
       </AppShell.Header>
-      <Container ref={ref} fluid style={{ height: "100%" }} px={0}>
-        <ReportTable mode={mode} report={report} height={rect.height} />
-      </Container>
+      <AppShell.Main>
+        <Container ref={ref} fluid style={{ height: "100%" }} px={0}>
+          {report && (
+            <ReportTable mode={mode} report={report} height={rect.height} />
+          )}
+        </Container>
+      </AppShell.Main>
     </AppShell>
   );
 };
