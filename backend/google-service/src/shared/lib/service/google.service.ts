@@ -122,7 +122,7 @@ export const createGoogleService = (credentials: {
 
       try {
         const response = await drive.files.list({
-          q: `name='${name}'`,
+          q: `name contains '${name}'`,
         });
 
         console.log("Files:", response.data.files);
