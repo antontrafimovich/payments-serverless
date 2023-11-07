@@ -1,9 +1,11 @@
 import { AppShell } from "@mantine/core";
 import { useLocalStorage } from "@mantine/hooks";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export const ReportSelector = () => {
   const [token] = useLocalStorage({ key: "token" });
+  const navigate = useNavigate();
 
   const [reportsData, setReportsData] =
     useState<{ name: string; id: string }[]>();
@@ -29,7 +31,9 @@ export const ReportSelector = () => {
       <AppShell.Header>Reports Selector</AppShell.Header>
       <AppShell.Main>
         {reportsData?.map((item) => (
-          <div key={item.id}>{item.name}</div>
+          <div key={item.id} onClick={() => navigate(`/payments/${item.id}`)}>
+            {item.name}
+          </div>
         ))}
       </AppShell.Main>
     </AppShell>
