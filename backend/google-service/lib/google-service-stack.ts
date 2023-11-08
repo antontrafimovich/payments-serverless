@@ -70,8 +70,22 @@ export class GoogleServiceStack extends cdk.Stack {
       },
     });
 
-    new lambda.NodejsFunction(this, "AtPaymentsApiGoogleGetFileContentHandler", {
-      entry: "src/get-file-content/index.ts",
+    new lambda.NodejsFunction(
+      this,
+      "AtPaymentsApiGoogleGetFileContentHandler",
+      {
+        entry: "src/get-file-content/index.ts",
+        handler: "handler",
+        runtime: Runtime.NODEJS_18_X,
+        environment: {
+          GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID as string,
+          GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET as string,
+        },
+      }
+    );
+
+    new lambda.NodejsFunction(this, "AtPaymentsApiGoogleRefreshTokenHandler", {
+      entry: "src/refresh-token/index.ts",
       handler: "handler",
       runtime: Runtime.NODEJS_18_X,
       environment: {

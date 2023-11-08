@@ -68,6 +68,10 @@ export const createGoogleService = (credentials: {
       oAuth2Client.setCredentials(JSON.parse(atob(token)));
     },
 
+    refreshToken: () => {
+      return oAuth2Client.refreshAccessToken();
+    },
+
     getUserInfo: () => {
       const oath2 = oauth2({ version: "v2", auth: oAuth2Client });
 
@@ -133,7 +137,7 @@ export const createGoogleService = (credentials: {
         throw error;
       }
     },
-    
+
     getFileContentById: async (fileId: string) => {
       const drive = googleDrive({ version: "v3", auth: oAuth2Client });
 
