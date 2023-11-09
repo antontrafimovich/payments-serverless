@@ -58,11 +58,47 @@ export class GoogleAuthService extends ThirdPartyAuthService {
       console.log("Response has been received:", response);
       const rawResponse = new TextDecoder("utf-8").decode(response.Payload);
 
-      console.log('response string:', JSON.parse(rawResponse))
+      console.log("response string:", JSON.parse(rawResponse));
 
       return JSON.parse(rawResponse);
     } catch (err) {
       console.log("Decoding Google Lambda GetToken Response error:", err);
+      throw err;
+    }
+  }
+
+  async refreshToken(
+    token: string,
+    redirectUri: string
+  ): Promise<Record<string, any>> {
+    const client = new LambdaClient({ region: process.env.REGION });
+    const command = new InvokeCommand({
+      FunctionName: process.env.GOOGLE_REFRESH_TOKEN_FUNCTION_NAME as string,
+      InvocationType: "RequestResponse",
+      Payload: JSON.stringify({ body: { token, redirectUri } }),
+    });
+
+    let response;
+    try {
+      console.log("Refresh token command has been invoked");
+      response = await client.send(command);
+    } catch (err) {
+      console.error(
+        "Auth Service: error with google's refreshToken functionality",
+        err
+      );
+      throw err;
+    }
+
+    try {
+      console.log("Response has been received:", response);
+      const rawResponse = new TextDecoder("utf-8").decode(response.Payload);
+
+      console.log("response string:", JSON.parse(rawResponse));
+
+      return JSON.parse(rawResponse);
+    } catch (err) {
+      console.log("Decoding Google Lambda RefreshToken Response error:", err);
       throw err;
     }
   }

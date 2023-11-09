@@ -27,7 +27,8 @@ export class AuthServiceStack extends cdk.Stack {
       runtime: Runtime.NODEJS_18_X,
       environment: {
         REGION: process.env.REGION!,
-        REDIRECT_TO: "https://7nbmfhr8y9.execute-api.eu-central-1.amazonaws.com/prod/auth/redirect",
+        REDIRECT_TO:
+          "https://7nbmfhr8y9.execute-api.eu-central-1.amazonaws.com/prod/auth/redirect",
         GOOGLE_AUTH_HANDLER_FUNCTION_NAME: googleAuthHandler.functionName,
       },
       bundling: {
@@ -47,12 +48,34 @@ export class AuthServiceStack extends cdk.Stack {
       handler: "handler",
       runtime: Runtime.NODEJS_18_X,
       environment: {
-        REGION: process.env.REGION!,
         FRONTEND_REDIRECT_URI: process.env.FRONTEND_REDIRECT_URI as string,
         GOOGLE_GET_TOKEN_FUNCTION_NAME: googleGetTokenHandler.functionName,
       },
     });
     googleGetTokenHandler.grantInvoke(redirectHandler);
+
+    const googleRefreshTokenHandler = Function.fromFunctionArn(
+      this,
+      "GoogleRefreshTokenHandler",
+      process.env.GOOGLE_REFRESH_TOKEN_LAMBDA_ARN!
+    );
+
+    const refreshTokenHandler = new lambda.NodejsFunction(
+      this,
+      "RefreshTokenHandler",
+      {
+        entry: "src/refresh-token/index.ts",
+        handler: "handler",
+        runtime: Runtime.NODEJS_18_X,
+        environment: {
+          FRONTEND_REDIRECT_URI: process.env.FRONTEND_REDIRECT_URI as string,
+          GOOGLE_REDIRECT_URI: process.env.GOOGLE_REDIRECT_URI as string,
+          GOOGLE_REFRESH_TOKEN_FUNCTION_NAME:
+            googleRefreshTokenHandler.functionName,
+        },
+      }
+    );
+    googleRefreshTokenHandler.grantInvoke(refreshTokenHandler);
 
     const authIntegration = new gw.LambdaIntegration(authHandler);
     const authResource = gateway.root.addResource("auth");
@@ -61,5 +84,11 @@ export class AuthServiceStack extends cdk.Stack {
     const redirectIntegration = new gw.LambdaIntegration(redirectHandler);
     const redirectResource = authResource.addResource("redirect");
     redirectResource.addMethod("GET", redirectIntegration);
+
+    const refreshTokenIntegration = new gw.LambdaIntegration(
+      refreshTokenHandler
+    );
+    const refreshTokenResource = authResource.addResource("refresh");
+    refreshTokenResource.addMethod("POST", refreshTokenIntegration);
   }
 }
