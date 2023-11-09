@@ -1,5 +1,9 @@
 import { createGoogleClient } from "../shared/lib/service/google-client.service";
-import { NO_REDIRECT_URI_ERROR, NO_TOKEN_ERROR } from "./lib/error";
+import {
+  NO_REDIRECT_URI_ERROR,
+  NO_TOKEN_ERROR,
+  createRefreshTokenError,
+} from "./lib/error";
 
 const parseToken = (token: string) => {
   const decodedBase64Token = decodeURIComponent(token);
@@ -40,12 +44,9 @@ export const handler = async (event: {
 
     return btoa(JSON.stringify(credentials));
   } catch (err) {
-    const error = new Error(
-      `Google Service: error in refreshing token: ${err}`
-    );
-
+    const error = createRefreshTokenError((err as Error).message);
     console.error(error);
 
-    return error;
+    throw error;
   }
 };
