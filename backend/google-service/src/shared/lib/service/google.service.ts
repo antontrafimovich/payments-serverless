@@ -57,6 +57,7 @@ export const createGoogleService = (credentials: {
       return oAuth2Client.generateAuthUrl({
         access_type: "offline",
         scope,
+        prompt: 'consent'
       });
     },
 
@@ -65,7 +66,9 @@ export const createGoogleService = (credentials: {
     },
 
     setToken: (token: string) => {
-      oAuth2Client.setCredentials(JSON.parse(atob(token)));
+      const creds = JSON.parse(atob(token));
+      console.log("creds:", creds);
+      oAuth2Client.setCredentials(creds);
     },
 
     refreshToken: () => {
