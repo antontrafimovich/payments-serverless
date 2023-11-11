@@ -1,7 +1,7 @@
 import { Route, Routes } from "react-router-dom";
 
 import { Main } from "../main";
-import { Redirect } from "../redirect";
+import { Redirect } from "../redirect/redirect";
 import { Auth } from "../auth/auth";
 import { ReportSelector } from "../selector/report-selector";
 import { Payments } from "../payments";

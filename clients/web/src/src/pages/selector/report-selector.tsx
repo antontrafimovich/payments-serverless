@@ -1,36 +1,38 @@
 import { AppShell } from "@mantine/core";
-import { useLocalStorage } from "@mantine/hooks";
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 
+import { request } from "../../shared/lib/utils/http";
+
+type Report = {
+  name: string;
+  id: string;
+};
+
+const getReportsList = (): Promise<Report[]> => {
+  return request(
+    "https://0vum1ao9sc.execute-api.eu-central-1.amazonaws.com/prod/report",
+    {}
+  ).then((data) => data.json());
+};
+
 export const ReportSelector = () => {
-  const [token] = useLocalStorage({ key: "token" });
   const navigate = useNavigate();
 
-  const [reportsData, setReportsData] =
-    useState<{ name: string; id: string }[]>();
+  const { data, isPending, error } = useQuery({
+    queryKey: ["reports"],
+    queryFn: getReportsList,
+  });
 
-  useEffect(() => {
-    token &&
-      fetch(
-        "https://0vum1ao9sc.execute-api.eu-central-1.amazonaws.com/prod/report",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      )
-        .then((data) => data.json())
-        .then(setReportsData);
-  }, [token]);
-
-  console.log(reportsData);
+  console.log(data);
+  console.log(error);
 
   return (
     <AppShell header={{ height: 60 }}>
       <AppShell.Header>Reports Selector</AppShell.Header>
       <AppShell.Main>
-        {reportsData?.map((item) => (
+        {isPending && "Loading..."}
+        {data?.map((item) => (
           <div key={item.id} onClick={() => navigate(`/payments/${item.id}`)}>
             {item.name}
           </div>
