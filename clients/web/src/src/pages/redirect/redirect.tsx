@@ -12,7 +12,7 @@ export const Redirect = () => {
     return query.toString().split("token=")[1];
   }, [query]);
 
-  localStorage.setItem("token", token);
+  localStorage.setItem("token", atob(decodeURIComponent(token)));
 
   window.close();
 
