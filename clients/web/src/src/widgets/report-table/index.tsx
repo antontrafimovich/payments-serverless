@@ -8,8 +8,8 @@ import {
   createMapRecord,
   getMapTypes,
   Report,
-  useGetNew,
-  usePostNew,
+  useGet,
+  usePost,
 } from "../../shared";
 import { useData } from "./lib";
 import { Payment, Row } from "./model";
@@ -23,8 +23,8 @@ export type ReportTableProps = {
 export const ReportTable = ({ height, report, mode }: ReportTableProps) => {
   const { setReport } = useContext(AppContext);
 
-  const { post, pending, data } = usePostNew(createMapRecord);
-  const { data: options } = useGetNew(getMapTypes);
+  const { post, pending, data } = usePost(createMapRecord);
+  const { data: options } = useGet(getMapTypes);
 
   const [paymentToModify, setPaymentToModify] = useState<Payment | null>(null);
 
