@@ -5,6 +5,11 @@ import {
   GoogleAuthService,
   ThirdPartyAuthService,
 } from "../shared";
+import { createResponse } from "./shared/lib/response";
+import {
+  INCORRECT_BODY_FORMAT_ERROR,
+  UNAUTHORIZED_ERROR,
+} from "./shared/lib/errors";
 
 const getAuthService = (type: "google" | "local"): AuthService => {
   if (type === "google") {
@@ -85,28 +90,55 @@ type AuthType = "google" | "local";
 
 const DEFAULT_AUTH_TYPE: AuthType = "google";
 
+const getAuthTypeFromBody = (body: string | null) => {
+  if (!body) {
+    return DEFAULT_AUTH_TYPE;
+  }
+
+  let bodyParsed;
+
+  try {
+    bodyParsed = JSON.parse(body);
+  } catch (err) {
+    throw INCORRECT_BODY_FORMAT_ERROR;
+  }
+
+  const { type } = bodyParsed;
+
+  return type ?? DEFAULT_AUTH_TYPE;
+};
+
 export const handler = async (
   event: APIGatewayEvent
 ): Promise<APIGatewayProxyResult> => {
   console.log(event);
 
-  const body = JSON.parse(event.body!);
+  let type: AuthType;
 
-  const type = body?.type ?? DEFAULT_AUTH_TYPE;
+  try {
+    type = getAuthTypeFromBody(event.body);
+  } catch (err) {
+    return createResponse(400, JSON.stringify(err), "application/json");
+  }
 
-  const [, token] = event.headers["Authorization"]?.split("Bearer ")!;
+  const authorizationHeader = event.headers?.["Authorization"];
+
+  if (!authorizationHeader) {
+    return createResponse(
+      401,
+      JSON.stringify(UNAUTHORIZED_ERROR),
+      "application/json"
+    );
+  }
+
+  const [, token] = authorizationHeader.split("Bearer ")!;
 
   if (!token) {
-    return {
-      statusCode: 401,
-      headers: {
-        "Content-type": "text/plain",
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Headers": "*",
-        "Access-Control-Allow-Methods": "*",
-      },
-      body: "User is not authenticated",
-    };
+    return createResponse(
+      401,
+      JSON.stringify(UNAUTHORIZED_ERROR),
+      "application/json"
+    );
   }
 
   const authService = getAuthService(type);
