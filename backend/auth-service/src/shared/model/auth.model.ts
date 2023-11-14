@@ -1,5 +1,7 @@
 export abstract class AuthService {
   public isThirdParty: boolean;
+
+  public abstract refreshToken(token: string): Promise<Record<string, any>>;
 }
 
 export abstract class ThirdPartyAuthService extends AuthService {
@@ -10,11 +12,6 @@ export abstract class ThirdPartyAuthService extends AuthService {
   public abstract getToken(
     code: string,
     redirectTo: string
-  ): Promise<Record<string, any>>;
-
-  public abstract refreshToken(
-    token: string,
-    redirectUri: string
   ): Promise<Record<string, any>>;
 }
 

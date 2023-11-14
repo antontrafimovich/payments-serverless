@@ -22,15 +22,15 @@ jest.mock("./../../../src/shared/lib/service/google-client.service.ts", () => {
 });
 
 describe("Refresh Token functionality", () => {
-  it("should throw error if redirectUri is not provided", async () => {
-    expect.assertions(1);
+  // it("should throw error if redirectUri is not provided", async () => {
+  //   expect.assertions(1);
 
-    const INPUT_PARAMS = { body: { token: "fake" } } as any;
+  //   const INPUT_PARAMS = { body: { token: "fake" } } as any;
 
-    await expect(handler(INPUT_PARAMS)).rejects.toThrowError(
-      NO_REDIRECT_URI_ERROR
-    );
-  });
+  //   await expect(handler(INPUT_PARAMS)).rejects.toThrowError(
+  //     NO_REDIRECT_URI_ERROR
+  //   );
+  // });
 
   it("should throw error if token is not provided", async () => {
     expect.assertions(1);

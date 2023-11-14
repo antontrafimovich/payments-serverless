@@ -57,6 +57,7 @@ export const createGoogleService = (credentials: {
       return oAuth2Client.generateAuthUrl({
         access_type: "offline",
         scope,
+        prompt: "force",
       });
     },
 

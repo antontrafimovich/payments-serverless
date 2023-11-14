@@ -67,15 +67,12 @@ export class GoogleAuthService extends ThirdPartyAuthService {
     }
   }
 
-  async refreshToken(
-    token: string,
-    redirectUri: string
-  ): Promise<Record<string, any>> {
+  async refreshToken(token: string): Promise<Record<string, any>> {
     const client = new LambdaClient({ region: process.env.REGION });
     const command = new InvokeCommand({
       FunctionName: process.env.GOOGLE_REFRESH_TOKEN_FUNCTION_NAME as string,
       InvocationType: "RequestResponse",
-      Payload: JSON.stringify({ body: { token, redirectUri } }),
+      Payload: JSON.stringify({ body: { token } }),
     });
 
     let response;
@@ -91,10 +88,14 @@ export class GoogleAuthService extends ThirdPartyAuthService {
     }
 
     try {
-      console.log("Response has been received:", response);
       const rawResponse = new TextDecoder("utf-8").decode(response.Payload);
+      const parsedResonse = JSON.parse(rawResponse);
 
-      console.log("response string:", JSON.parse(rawResponse));
+      console.log("parsedResponse:", parsedResonse);
+
+      if (parsedResonse.errorType) {
+        throw new Error(parsedResonse.errorMessage);
+      }
 
       return JSON.parse(rawResponse);
     } catch (err) {

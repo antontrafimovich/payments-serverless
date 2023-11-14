@@ -19,9 +19,9 @@ export const handler = async (event: {
 
   const { token, redirectUri } = event.body;
 
-  if (!redirectUri) {
-    throw NO_REDIRECT_URI_ERROR;
-  }
+  // if (!redirectUri) {
+  //   throw NO_REDIRECT_URI_ERROR;
+  // }
 
   if (!token) {
     throw NO_TOKEN_ERROR;
@@ -30,7 +30,7 @@ export const handler = async (event: {
   const client = createGoogleClient({
     clientId: process.env.GOOGLE_CLIENT_ID!,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-    redirectUri: `https://${redirectUri}`,
+    redirectUri: redirectUri ? `https://${redirectUri}` : undefined,
   });
 
   const creds = parseToken(token);
