@@ -72,15 +72,14 @@ export const createGoogleService = () => {
     },
     getFileContentById: async (
       fileId: string,
-      token: string,
-      redirectUri: string
+      token: string
     ): Promise<string> => {
       const command = new InvokeCommand({
         FunctionName: process.env
           .GOOGLE_GET_FILE_CONTENT_FUNCTION_NAME as string,
         InvocationType: "RequestResponse",
         Payload: JSON.stringify({
-          body: { redirectUri, fileId, token },
+          body: { fileId, token },
         }),
       });
 
