@@ -1,4 +1,4 @@
-import { merge } from "../../src/merge";
+import { merge } from "../../../src/create/merge";
 
 describe("merge", () => {
   expect.hasAssertions();

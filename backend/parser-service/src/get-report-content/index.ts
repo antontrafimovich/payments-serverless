@@ -3,37 +3,39 @@ import { EOL } from "node:os";
 
 import { stringToError, toResponse } from "../shared";
 import { createGoogleService } from "../shared/service/google.service";
+import { withAuth } from "./with-auth";
+import { withRequiredParam } from "./with-required-param";
 
-export const handler = async (
+const getReportContentHandler = async (
   event: APIGatewayEvent
 ): Promise<APIGatewayProxyResult> => {
   console.log(event);
 
-  const { reportId } = event.pathParameters!;
-
-  const [, token] = event.headers["Authorization"]?.split("Bearer ")!;
-
-  if (!token) {
-    return stringToError("User is not authenticated", 401);
-  }
+  const reportId = event.pathParameters!.reportId!;
+  const [, token] = event.headers["Authorization"]!.split("Bearer ")!;
 
   const googleService = createGoogleService();
 
-  const reports = await googleService.getFileContentById(
-    reportId!,
-    token,
-    process.env.GOOGLE_REDIRECT_URI!
-  );
+  try {
+    const reports = await googleService.getFileContentById(reportId, token);
 
-  console.log(reports);
+    console.log(reports);
 
-  const [headersString, ...contentStrings] = reports.split(EOL);
+    const [headersString, ...contentStrings] = reports.split(EOL);
 
-  return toResponse({
-    statusCode: 200,
-    body: JSON.stringify({
-      headers: headersString.split(","),
-      data: contentStrings.map((str) => str.split(",")),
-    }),
-  });
+    return toResponse({
+      statusCode: 200,
+      body: JSON.stringify({
+        headers: headersString.split(","),
+        data: contentStrings.map((str) => str.split(",")),
+      }),
+    });
+  } catch (err) {
+    return stringToError((err as Error).message, 500);
+  }
 };
+
+export const handler = withRequiredParam(
+  withAuth(getReportContentHandler),
+  "reportId"
+);
