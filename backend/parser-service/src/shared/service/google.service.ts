@@ -1,6 +1,26 @@
 import { InvokeCommand, LambdaClient } from "@aws-sdk/client-lambda";
 
-export const createGoogleService = () => {
+export type ExternalFile = {
+  name: string;
+  id: string;
+};
+
+export type ExternalStorageService = {
+  createStorage: (
+    name: string,
+    token: string,
+    data: string[][],
+    redirectUri: string
+  ) => Promise<string>;
+  getFileListByName: (
+    name: string,
+    token: string,
+    redirectUri: string
+  ) => Promise<ExternalFile[]>;
+  getFileContentById: (fileId: string, token: string) => Promise<string>;
+};
+
+export const createGoogleService = (): ExternalStorageService => {
   const client = new LambdaClient({ region: process.env.REGION });
 
   return {
@@ -42,7 +62,7 @@ export const createGoogleService = () => {
       name: string,
       token: string,
       redirectUri: string
-    ): Promise<{ name: string; id: string }[]> => {
+    ): Promise<ExternalFile[]> => {
       const command = new InvokeCommand({
         FunctionName: process.env.GOOGLE_GET_FILE_LIST_FUNCTION_NAME as string,
         InvocationType: "RequestResponse",
@@ -105,7 +125,5 @@ export const createGoogleService = () => {
         throw err;
       }
     },
-    patchStorage: async () => {},
-    appendDataToStorage: async () => {},
   };
 };
