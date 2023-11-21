@@ -13,7 +13,7 @@ const getReportsList = (): Promise<Report[]> => {
   return request(
     "https://0vum1ao9sc.execute-api.eu-central-1.amazonaws.com/prod/report",
     {}
-  ).then((data) => data.json());
+  ).then((data) => data!.json());
 };
 
 export const ReportSelector = () => {
@@ -32,11 +32,12 @@ export const ReportSelector = () => {
       <AppShell.Header>Reports Selector</AppShell.Header>
       <AppShell.Main>
         {isPending && "Loading..."}
-        {data?.map((item) => (
-          <div key={item.id} onClick={() => navigate(`/payments/${item.id}`)}>
-            {item.name}
-          </div>
-        ))}
+        {data &&
+          data?.map((item) => (
+            <div key={item.id} onClick={() => navigate(`/payments/${item.id}`)}>
+              {item.name}
+            </div>
+          ))}
       </AppShell.Main>
     </AppShell>
   );
