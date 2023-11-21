@@ -1,6 +1,6 @@
 import { APIGatewayEvent, APIGatewayProxyResult } from "aws-lambda";
 
-import { stringToError } from "../shared";
+import { stringToError } from "../../shared";
 
 export const withAuth = (
   handler: (event: APIGatewayEvent) => Promise<APIGatewayProxyResult>

@@ -1,8 +1,7 @@
 import { APIGatewayEvent } from "aws-lambda";
 
-import { withAuth } from "../../../src/get-report-content/with-auth";
-import { withRequiredParam } from "../../../src/get-report-content/with-required-param";
-import { stringToError } from "../../../src/shared";
+import { stringToError } from "../../../../src/shared";
+import { withRequiredParam } from "../../../../src/shared/hocs/with-required-param";
 
 const MOCK_HANDLER = jest.fn();
 

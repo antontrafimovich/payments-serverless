@@ -1,6 +1,7 @@
-import { APIGatewayEvent, APIGatewayProxyResult } from "aws-lambda";
-import { withAuth } from "../../../src/get-report-content/with-auth";
-import { stringToError } from "../../../src/shared";
+import { APIGatewayEvent } from "aws-lambda";
+
+import { stringToError } from "../../../../src/shared";
+import { withAuth } from "../../../../src/shared/hocs/with-auth";
 
 const MOCK_HANDLER = jest.fn();
 
