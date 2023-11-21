@@ -7,9 +7,11 @@ import {
   UnstyledButton,
 } from "@mantine/core";
 import { useResizeObserver } from "@mantine/hooks";
-import { ComponentProps, FC, useEffect, useMemo, useState } from "react";
+import { QueryFunctionContext, useQuery } from "@tanstack/react-query";
+import { ComponentProps, FC, useContext, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
+import { AppContext } from "../../app";
 import {
   Logo,
   PivotTableIcon,
@@ -17,7 +19,7 @@ import {
   TableIcon,
   withHover,
 } from "../../shared";
-import { useLocalStorage } from "../../shared/lib/hooks/local-storage";
+import { request } from "../../shared/lib/utils/http";
 import { ReportTable } from "../../widgets";
 
 export type ExpensesProps = {
@@ -49,52 +51,27 @@ const actionDescriptors: {
   { icon: withHover(PivotTableIcon, "#333333"), label: "Pivot" },
 ];
 
+const getReport = ({ queryKey }: QueryFunctionContext): Promise<Report> => {
+  const [_, id] = queryKey;
+
+  return request(
+    `https://0vum1ao9sc.execute-api.eu-central-1.amazonaws.com/prod/report/${id}`,
+    {}
+  ).then((data) => data!.json());
+};
+
 export const Payments = () => {
   const [ref, rect] = useResizeObserver();
-  const [token] = useLocalStorage("token");
   const { reportId } = useParams();
+  const [mode, setMode] = useState<"plain" | "pivot">("plain");
   const navigate = useNavigate();
 
-  const [userInfo, setUserInfo] = useState<any>(null);
+  const { userInfo } = useContext(AppContext);
 
-  // const { setReport } = useContext(AppContext);
-
-  const [report, setReport] = useState<Report>();
-
-  const [mode, setMode] = useState<"plain" | "pivot">("plain");
-
-  useEffect(() => {
-    if (reportId) {
-      fetch(
-        `https://0vum1ao9sc.execute-api.eu-central-1.amazonaws.com/prod/report/${reportId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      )
-        .then((data) => data.json())
-        .then(setReport);
-    }
-  }, [reportId]);
-
-  // const onDownload = useCallback(() => {
-  //   const data = JSON.stringify(report);
-  //   download(data, "report.json");
-  // }, [report]);
-
-  useEffect(() => {
-    fetch(
-      "https://hmgnhh3uy2.execute-api.eu-central-1.amazonaws.com/prod/user",
-      {
-        headers: {
-          authorization: `Bearer ${token}`,
-        },
-      }
-    )
-      .then((data) => data.json())
-      .then((data) => setUserInfo(data.data));
-  }, [token]);
+  const { data: report } = useQuery({
+    queryKey: ["reports", reportId],
+    queryFn: getReport,
+  });
 
   const actions = useMemo(() => {
     return actionDescriptors.map((action) => (
