@@ -1,14 +1,26 @@
-import {
-  createContext,
-  Dispatch,
-  ReactNode,
-  SetStateAction,
-  useState,
-} from "react";
+import { createContext, ReactNode, useState } from "react";
 
-import { Report, usePost } from "../../../shared";
-import { createReport as createReportRequest } from "../../../shared";
+import {
+  createReport as createReportRequest,
+  Report,
+  usePost,
+} from "../../../shared";
 import { useLocalStorage } from "../../../shared/lib/hooks/local-storage";
+import { parseJwt } from "../../../shared/lib/utils/jwt";
+
+type UserInfo = {
+  at_hash: string;
+  aud: string;
+  azp: string;
+  exp: number;
+  given_name: string;
+  iat: number;
+  iss: string;
+  locale: string;
+  name: string;
+  picture: string;
+  sub: string;
+};
 
 type AppContext = {
   report: {
@@ -16,9 +28,7 @@ type AppContext = {
     data: Report | null;
   } | null;
   createReport: ((report: File, bank: string) => void) | null;
-  authInfo: {
-    expiryDate: number;
-  };
+  userInfo: UserInfo | null;
 };
 
 export const AppContext = createContext<AppContext>({} as AppContext);
@@ -29,6 +39,14 @@ const getCredentials = (token: string) => {
   }
 
   return JSON.parse(token);
+};
+
+const getUserInfoFromCreds = (creds: any) => {
+  if (!creds) {
+    return null;
+  }
+
+  return parseJwt<UserInfo>(creds?.id_token);
 };
 
 export const withAppProvider = (Component: () => ReactNode) => {
@@ -43,7 +61,7 @@ export const withAppProvider = (Component: () => ReactNode) => {
     return (
       <AppContext.Provider
         value={{
-          authInfo: { expiryDate: creds?.expiry_date },
+          userInfo: getUserInfoFromCreds(creds),
           report: { pending, data },
           createReport: (report: File, bank: string) => {
             post(report, bank)
