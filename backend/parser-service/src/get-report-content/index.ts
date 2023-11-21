@@ -2,9 +2,9 @@ import { APIGatewayEvent, APIGatewayProxyResult } from "aws-lambda";
 import { EOL } from "node:os";
 
 import { stringToError, toResponse } from "../shared";
+import { withAuth } from "../shared/hocs/with-auth";
+import { withRequiredParam } from "../shared/hocs/with-required-param";
 import { createGoogleService } from "../shared/service/google.service";
-import { withAuth } from "./with-auth";
-import { withRequiredParam } from "./with-required-param";
 
 const getReportContentHandler = async (
   event: APIGatewayEvent

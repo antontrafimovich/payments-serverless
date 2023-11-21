@@ -1,19 +1,15 @@
 import { APIGatewayEvent, APIGatewayProxyResult } from "aws-lambda";
 
-import { stringToError, toResponse } from "../shared";
+import { toResponse } from "../shared";
+import { withAuth } from "../shared/hocs/with-auth";
 import { createGoogleService } from "../shared/service/google.service";
 
-export const handler = async (
+const getReports = async (
   event: APIGatewayEvent
 ): Promise<APIGatewayProxyResult> => {
   console.log(event);
 
-  const [, token] = event.headers["Authorization"]?.split("Bearer ")!;
-
-  if (!token) {
-    return stringToError("User is not authenticated", 401);
-  }
-
+  const [, token] = event.headers["Authorization"]!.split("Bearer ");
   const googleService = createGoogleService();
 
   const reports = await googleService.getFileListByName(
@@ -29,3 +25,5 @@ export const handler = async (
     body: JSON.stringify(reports),
   });
 };
+
+export const handler = withAuth(getReports);
