@@ -1,6 +1,6 @@
 import { APIGatewayEvent, APIGatewayProxyResult } from "aws-lambda";
 
-import { stringToError } from "../shared";
+import { stringToError } from "../utils";
 
 export const withRequiredParam = (
   handler: (event: APIGatewayEvent) => Promise<APIGatewayProxyResult>,
