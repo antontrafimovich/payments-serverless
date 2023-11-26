@@ -84,7 +84,15 @@ export const createGoogleService = (): ExternalStorageService => {
         console.log("Response has been received:", response);
         const rawResponse = new TextDecoder("utf-8").decode(response.Payload);
 
-        return JSON.parse(rawResponse);
+        const parsedResonse = JSON.parse(rawResponse);
+
+        console.log("parsedResponse:", parsedResonse);
+
+        if (parsedResonse.errorType) {
+          throw new Error(parsedResonse.errorMessage);
+        }
+
+        return parsedResonse;
       } catch (err) {
         console.log("Decoding Google Lambda GetFileList response error:", err);
         throw err;
