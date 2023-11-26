@@ -9,11 +9,18 @@ type Report = {
   id: string;
 };
 
-const getReportsList = (): Promise<Report[]> => {
-  return request(
+const getReportsList = async (): Promise<Report[]> => {
+  const response = await request(
     "https://0vum1ao9sc.execute-api.eu-central-1.amazonaws.com/prod/report",
     {}
-  ).then((data) => data!.json());
+  );
+
+  if (response?.ok) {
+    return response.json();
+  }
+
+  const error = await response?.text();
+  throw new Error(error);
 };
 
 export const ReportSelector = () => {
@@ -32,7 +39,9 @@ export const ReportSelector = () => {
       <AppShell.Header>Reports Selector</AppShell.Header>
       <AppShell.Main>
         {isPending && "Loading..."}
+        {error && error.message}
         {data &&
+          !error &&
           data?.map((item) => (
             <div key={item.id} onClick={() => navigate(`/payments/${item.id}`)}>
               {item.name}
