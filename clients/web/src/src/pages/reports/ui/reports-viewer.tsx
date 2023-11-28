@@ -11,16 +11,16 @@ import { QueryFunctionContext, useQuery } from "@tanstack/react-query";
 import { ComponentProps, FC, useContext, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
-import { AppContext } from "../../app";
+import { AppContext } from "../../../app";
 import {
   Logo,
   PivotTableIcon,
   Report,
   TableIcon,
   withHover,
-} from "../../shared";
-import { request } from "../../shared/lib/utils/http";
-import { ReportTable } from "../../widgets";
+} from "../../../shared";
+import { request } from "../../../shared/lib/utils/http";
+import { ReportTable } from "../../../widgets";
 
 export type ExpensesProps = {
   report: Report;
@@ -64,13 +64,11 @@ export type PaymentsProps = {
   reportId: string;
 };
 
-export const Payments = ({ reportId }: PaymentsProps) => {
+export const ReportsViewer = () => {
   const [ref, rect] = useResizeObserver();
-  // const { reportId } = useParams();
+  const { reportId } = useParams();
   const [mode, setMode] = useState<"plain" | "pivot">("plain");
   const navigate = useNavigate();
-
-  const { userInfo } = useContext(AppContext);
 
   const { data: report, isLoading } = useQuery({
     queryKey: ["reports", reportId],
@@ -89,35 +87,11 @@ export const Payments = ({ reportId }: PaymentsProps) => {
   }, [actionDescriptors]);
 
   return (
-    <AppShell
-      padding="md"
-      header={{ height: 60 }}
-      navbar={{ width: 40, breakpoint: "xs" }}
-    >
-      <AppShell.Navbar>
-        <Stack>{actions}</Stack>
-      </AppShell.Navbar>
-      <AppShell.Header>
-        <Flex justify="space-between" align="center">
-          <Logo
-            onClick={() => navigate("/reports")}
-            type="horizontal"
-            style={{ width: "171.6px", height: "38.62px" }}
-          />
-          {userInfo?.name || "Noname"}
-          {/* <Button ml="auto" onClick={onDownload}>
-            Download
-          </Button> */}
-        </Flex>
-      </AppShell.Header>
-      <AppShell.Main>
-        <Container ref={ref} fluid style={{ height: "100%" }} px={0}>
-          {isLoading && "Loading..."}
-          {report && (
-            <ReportTable mode={mode} report={report} height={rect.height} />
-          )}
-        </Container>
-      </AppShell.Main>
-    </AppShell>
+    <Container ref={ref} fluid ml={0} style={{ height: "100%" }}>
+      {/* {isLoading && "Loading..."} */}
+      {report && (
+        <ReportTable mode={mode} report={report} height={rect.height} />
+      )}
+    </Container>
   );
 };
